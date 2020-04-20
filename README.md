@@ -159,15 +159,18 @@ and better decide product direction, among other benefits.
 
 ## Checklist
 
--   [:question:] Reproduce prior week's success with PostgreSQL installation on
-    ECS, EC2 + EBS, and CloudFormation
+-   [:heavy_check_mark:] Reproduce prior week's success with PostgreSQL
+    installation on ECS, EC2 + EBS, and CloudFormation
+
+-   [:question:] Create a CloudFormation IAM + Key Management + Secrets
+    Management definition to see whether IAM user setup from Chapter 3 of
+    *Docker on AWS* can be automated, and secrets management for app secret
+    keys, app superuser, and database passwords can be pre-created and hooked in
+    beforehand
+
 -   [:question:] Copy over the `docker-compose` setup I used for
     `tinydevcrm-api`, and load up Django + `gunicorn` + NGINX + PostgreSQL +
     static files
--   [:question:] Create a CloudFormation IAM + Secrets Management definition to
-    see whether IAM user setup from Chapter 3 of *Docker on AWS* can be
-    automated, and secrets management for app secret keys, app superuser, and
-    database passwords can be pre-created and hooked in beforehand
 -   [:question:] Create CloudFormation templates for ECR repositories, and get
     the PostgreSQL + `pg_cron` image pushed up to ECR as part of that effort
 -   [:question:] Set up a CloudFormation EBS volume to scale out the data layer

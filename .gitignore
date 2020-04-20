@@ -1,2 +1,3 @@
 postgres-taskdef.json
 postgres-svcdef.json
+drain-instance.sh
