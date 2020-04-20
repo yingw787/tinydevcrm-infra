@@ -2,7 +2,36 @@
 
 ## Quick Start
 
-TODO
+1.  Install your AWS profile, and make sure env variable `AWS_PROFILE` is loaded
+    properly:
+
+    ```bash
+    export AWS_PROFILE=$SOME_AWS_PROFILE
+    ```
+
+2.  Create the CloudFormation stack:
+
+    ```bash
+    make create-stack
+    ```
+
+3.  Export the CloudFormation env variables:
+
+    ```bash
+    ./get-outputs.sh rexray-demo us-east-1 && source <(./get-outputs.sh rexray-demo us-east-1)
+    ```
+
+4.  Create the PostgreSQL ECS task definition:
+
+    ```bash
+    ./postgres-taskdef.sh
+    ```
+
+5.  Provision an EBS volume:
+
+    ```bash
+    aws ec2 create-volume --size 1 --volume-type gp2 --availability-zone $AvailabilityZone --tag-specifications 'ResourceType=volume,Tags=[{Key=Name,Value=rexray-vol}]'
+    ```
 
 ## Overview
 
