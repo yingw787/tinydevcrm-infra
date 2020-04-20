@@ -33,6 +33,36 @@
     aws ec2 create-volume --size 1 --volume-type gp2 --availability-zone $AvailabilityZone --tag-specifications 'ResourceType=volume,Tags=[{Key=Name,Value=rexray-vol}]'
     ```
 
+6.  Register the task definition:
+
+    ```bash
+    export TaskDefinitionArn=$(aws ecs register-task-definition --cli-input-json 'file://postgres-taskdef.json' | jq -r .taskDefinition.taskDefinitionArn)
+    ```
+
+7.  Create a service definition:
+
+    ```bash
+    ./postgres-svcdef.sh
+    ```
+
+8.  Register the service definition:
+
+    ```bash
+    export SvcDefinitionArn=$(aws ecs create-service --cli-input-json file://postgres-svcdef.json | jq -r .service.serviceArn)
+    ```
+
+9.  Install `pgadmin4`, and open a process. Right click on the "Servers"
+    top-level tree item, and click on "Create Server". For parameters, enter:
+
+    - **General/Name**: `rexray-demo`
+    - **Connection/hostname**: $NLBFullyQualifiedName
+    - **Connection/Username**: postgres
+    - **Connection/Password**: Value of `POSTGRES_PASSWORD` in
+      `postgres-taskdef.json`.
+
+    You should see a server `rexray-demo` with expandable database `postgres` up
+    and running.
+
 ## Overview
 
 This repository defines the infrastructure I'm using for TinyDevCRM deployed on
