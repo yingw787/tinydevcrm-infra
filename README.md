@@ -63,6 +63,66 @@
     You should see a server `rexray-demo` with expandable database `postgres` up
     and running.
 
+10. Manually create a database `rexraydb`, and using the `pgadmin` Query Tool
+    and a connection to `rexraydb/postgres@rexray-demo`, and run the following
+    command:
+
+    ```sql
+    CREATE TABLE pets (name VARCHAR(20), breed VARCHAR(20));
+    INSERT INTO pets VALUES ('Fluffy', 'Poodle');
+    SELECT * FROM pets;
+    ```
+
+    Check that the data exists in the "Data Output" panel.
+
+11. Create `drain-instance.sh`:
+
+    ```bash
+    ./create-drain-instance.sh
+    ```
+
+12. Record the task definition ID in the ECS console for the PostgreSQL
+    instance.
+
+    For example, mine is currently `a7944fda-8dfd-4ed5-ad6b-9ecb49495cb3`.
+
+13. Drain the ECS instance.
+
+    ```bash
+    ./drain-instance.sh
+    ```
+
+    Because there's an underlying service definition registered with the ECS
+    cluster, the task definition will automatically restart.
+
+    You may need to cut and paste parts of `drain-instance.sh` into the console
+    in order to get the script to work properly.
+
+    Double check that the task definition is different. For example, mine is
+    currently `a0043f26-fd2d-4656-bd15-528c47b96132`.
+
+14. Reconnect `pgadmin4` to server `rexray-demo` and database `rexraydb`, and
+    verify that table `pets` is still there. For me, it is.
+
+    This concludes functionality testing.
+
+15. Delete the resources:
+
+    ```bash
+    # Delete ECS task definition and service definition
+    aws ecs update-service --cluster $ECSClusterName --service $SvcDefinitionArn \ --desired-count 0
+    aws ecs delete-service --cluster $ECSClusterName --service $SvcDefinitionArn
+
+    # Delete the EBS volume; may require deleting the task definition if draining takes too long.
+    rexrayVolumeID=$(aws ec2 describe-volumes --filter Name="tag:Name",Values=rexray-vol --query "Volumes[].VolumeId" --output text)
+    aws ec2 delete-volume --volume-id $rexrayVolumeID
+
+    # Delete the CloudFormation stack.
+    aws cloudformation delete-stack --stack rexray-demo
+    ```
+
+    This concludes this exercise.
+
 ## Overview
 
 This repository defines the infrastructure I'm using for TinyDevCRM deployed on
