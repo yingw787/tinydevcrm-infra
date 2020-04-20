@@ -14,6 +14,15 @@ monetize my variable costs (e.g. software development man-hours) into possible
 revenue generation schemes, ship high quality product with greater confidence,
 and better decide product direction, among other benefits.
 
+## System Requirements
+
+-   [**`awscli`**](https://github.com/aws/aws-cli) v1.18 or higher. I am using:
+
+    ```bash
+    $ aws --version
+    aws-cli/1.18.35 Python/3.7.7 Linux/5.3.0-46-generic botocore/1.15.35
+    ```
+
 ## Checklist
 
 -   [:question_mark:] Reproduce prior week's success with PostgreSQL
