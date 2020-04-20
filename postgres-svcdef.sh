@@ -20,10 +20,10 @@ cat > postgres-svcdef.json << EOF
     "networkConfiguration": {
         "awsvpcConfiguration": {
             "subnets": [
-                "subnet-018a2fe7a19f2911e"
+                "${SubnetId}"
             ],
             "securityGroups": [
-                "sg-05c728d2c78443220"
+                "${SecurityGroupId}"
             ],
             "assignPublicIp": "DISABLED"
         }
