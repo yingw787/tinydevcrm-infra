@@ -23,6 +23,21 @@ and better decide product direction, among other benefits.
     aws-cli/1.18.35 Python/3.7.7 Linux/5.3.0-46-generic botocore/1.15.35
     ```
 
+-   [**`docker`**](https://www.docker.com/) v19 or higher. I am using:
+
+    ```bash
+    $ docker --version
+    Docker version 19.03.6, build 369ce74a3c
+    ```
+
+-   [**`docker-compose`**](https://github.com/docker/compose) v1.23 or higher. I
+    am using:
+
+    ```bash
+    $ docker-compose --version
+    docker-compose version 1.23.2, build 1110ad01
+    ```
+
 ## Checklist
 
 -   [:question_mark:] Reproduce prior week's success with PostgreSQL
