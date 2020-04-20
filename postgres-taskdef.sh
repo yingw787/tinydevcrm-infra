@@ -6,7 +6,7 @@ cat > postgres-taskdef.json << EOF
                 "logDriver": "awslogs",
                 "options": {
                     "awslogs-group": "${CWLogGroupName}",
-                    "awslogs-region": "${AWSRegion}",,
+                    "awslogs-region": "${AWSRegion}",
                     "awslogs-stream-prefix": "ecs"
                 }
             },
