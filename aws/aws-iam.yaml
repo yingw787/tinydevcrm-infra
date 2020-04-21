@@ -1,41 +1,44 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 
 Description: Identity and access management layer for TinyDevCRM
 
 Resources:
-    AdminUser:
-        Type: AWS::IAM::User
-        Groups:
-        LoginProfile:
-        ManagedPolicyArns:
-        Path:
-        PermissionsBoundary:
-        Policies:
-        Tags:
-        UserName:
+    # AdminUser:
+    #     Type: AWS::IAM::User
+    #     Groups:
+    #     LoginProfile:
+    #     ManagedPolicyArns:
+    #     Path:
+    #     PermissionsBoundary:
+    #     Policies:
+    #     Tags:
+    #     UserName:
     AdminRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
-            Description:
-            ManagedPolicyArns:
-            MaxSessionDuration:
-            Path:
-            PermissionsBoundary:
-            Policies:
-            RoleName:
-            Tags:
-    AdminGroup:
-        Type: AWS::IAM::Group
-        Properties:
-            GroupName:
-            ManagedPolicyArns:
-            Path:
-            Policies:
-    UserGroup:
-        Type: AWS::IAM::Group
-        Properties:
-            GroupName:
-            ManagedPolicyArns:
-            Path:
-            Policies:
+                Version: '2012-10-17'
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                        Service:
+                            - ec2.amazonaws.com
+                      Action:
+                        - 'sts:AssumeRole'
+            Description: Temporarily elevates IAM user to admin-level privileges
+            MaxSessionDuration: 3600
+            RoleName: tinydevcrm-admin
+    # AdminGroup:
+    #     Type: AWS::IAM::Group
+    #     Properties:
+    #         GroupName:
+    #         ManagedPolicyArns:
+    #         Path:
+    #         Policies:
+    # UserGroup:
+    #     Type: AWS::IAM::Group
+    #     Properties:
+    #         GroupName:
+    #         ManagedPolicyArns:
+    #         Path:
+    #         Policies:
