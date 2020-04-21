@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Identity and access management layer for TinyDevCRM
+
+Resources:
+    AdminUser:
+        Type: AWS::IAM::User
+    AdminRole:
+        Type: AWS::IAM::Role
+        Properties:
