@@ -51,6 +51,25 @@ Resources:
                       Action: 'sts:AssumeRole'
                       Resource: !GetAtt AdminRole.Arn
 
+    RequireMFAPolicy:
+        Type: AWS::IAM::ManagedPolicy
+        Properties:
+            Description: Force IAM user to apply MFA before enabling resource control.
+            ManagedPolicyName: tinydevcrm-RequireMFAPolicy
+            # From: https://gist.github.com/mixja/15d2969efe806680c2a4b0059daaf697
+            PolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Sid: AllowAllUsersToListAccounts
+                      Effect: Allow
+                      Action:
+                        - iam:ListAccountAliases
+                        - iam:GetAccountPasswordPolicy
+                        - iam:ListUsers
+                        - iam:GetAccountSummary
+                      Resource:
+                        - '*'
+
     # AdminGroup:
     #     Type: AWS::IAM::Group
     #     Properties:
