@@ -7,9 +7,9 @@ Parameters:
         Type: String
         Description: Root AWS account ID
 
-    # MyPassword:
-    #     Type: String
-    #     Description: Password for IAM user
+    MyIAMUserPassword:
+        Type: String
+        Description: Password for IAM user
 
 Resources:
     AdminRole:
@@ -157,6 +157,5 @@ Resources:
                 - !Ref UserGroup
                 - !Ref AdminGroup
             LoginProfile:
-                # Password: !Ref MyPassword
-                Password: '1BeU&pVFG8()'
+                Password: !Ref MyIAMUserPassword
                 PasswordResetRequired: false
