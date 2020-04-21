@@ -133,17 +133,11 @@ Resources:
                         'Null':
                             'aws:MultiFactorAuthAge': 'true'
 
-    # AdminGroup:
-    #     Type: AWS::IAM::Group
-    #     Properties:
-    #         GroupName:
-    #         ManagedPolicyArns:
-    #         Path:
-    #         Policies:
-    # UserGroup:
-    #     Type: AWS::IAM::Group
-    #     Properties:
-    #         GroupName:
-    #         ManagedPolicyArns:
-    #         Path:
-    #         Policies:
+    UserGroup:
+        Type: AWS::IAM::Group
+        DependsOn:
+            - RequireMFAPolicy
+        Properties:
+            GroupName: tinydevcrm-users
+            ManagedPolicyArns:
+                - !Ref RequireMFAPolicy
