@@ -5,6 +5,37 @@ Description: Identity and access management layer for TinyDevCRM
 Resources:
     AdminUser:
         Type: AWS::IAM::User
+        Groups:
+        LoginProfile:
+        ManagedPolicyArns:
+        Path:
+        PermissionsBoundary:
+        Policies:
+        Tags:
+        UserName:
     AdminRole:
         Type: AWS::IAM::Role
         Properties:
+            AssumeRolePolicyDocument:
+            Description:
+            ManagedPolicyArns:
+            MaxSessionDuration:
+            Path:
+            PermissionsBoundary:
+            Policies:
+            RoleName:
+            Tags:
+    AdminGroup:
+        Type: AWS::IAM::Group
+        Properties:
+            GroupName:
+            ManagedPolicyArns:
+            Path:
+            Policies:
+    UserGroup:
+        Type: AWS::IAM::Group
+        Properties:
+            GroupName:
+            ManagedPolicyArns:
+            Path:
+            Policies:
