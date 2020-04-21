@@ -8,4 +8,4 @@ create-iam:
 deploy-iam:
 	# Don't apply parameter overrides via '--parameter-overrides', parameters
 	# should be passed during stack creation
-	aws cloudformation deploy --stack-name tinydevcrm-iam --template-file file://aws-iam.yaml --capabilities CAPABILITY_NAMED_IAM
+	aws cloudformation deploy --stack-name tinydevcrm-iam --template-file aws-iam.yaml --capabilities CAPABILITY_NAMED_IAM
