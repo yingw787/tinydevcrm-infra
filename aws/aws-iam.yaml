@@ -89,10 +89,28 @@ Resources:
                       Resource:
                         - !Sub arn:aws:iam::${RootAWSAccountID}:mfa/${!aws:username}
                         - !Sub arn:aws:iam::${RootAWSAccountID}:user/${!aws:username}
-                    # - Sid: DenyEverythingExceptForBelowUnlessMFAd
-                    #   Effect: Deny
-                    #   NotAction:
-                    #     - iamListViru
+                    - Sid: DenyEverythingExceptForBelowUnlessMFAd
+                      Effect: Deny
+                      NotAction:
+                        - iam:ListVirtualMFADevices
+                        - iam:ListMFADevices
+                        - iam:ListUsers
+                        - iam:ListAccountAliases
+                        - iam:CreateVirtualMFADevice
+                        - iam:EnableMFADevice
+                        - iam:ResyncMFADevice
+                        - iam:ChangePassword
+                        - iam:CreateLoginProfile
+                        - iam:DeleteLoginProfile
+                        - iam:GetAccountPasswordPolicy
+                        - iam:GetAccountSummary
+                        - iam:GetLoginProfile
+                        - iam:UpdateLoginProfile
+                      Resource:
+                        - '*'
+                      Condition:
+                        'Null':
+                          'aws:MultiFactorAuthAge': 'true'
 
     # AdminGroup:
     #     Type: AWS::IAM::Group
