@@ -1,3 +1,16 @@
+# This AWS CloudFormation stack definition deploys the IAM users, groups, roles,
+# and policies necessary for 2FA-enabled administrator access to AWS resources.
+#
+# NOTE: This YAML document is formatted using 'cfn-format':
+# https://github.com/awslabs/aws-cloudformation-template-formatter. There is no
+# version number available, but likely v1.1.0 according to:
+# https://snapcraft.io/cfn-format. This tool is necessary and a pure YAML
+# formatter cannot be used because of special CloudFormation syntax like !Ref or
+# !Sub. 'cfn-format' strips all comments from the template, which necessitates
+# copying and pasting these comments back in. This is a known issue:
+# https://github.com/awslabs/aws-cloudformation-template-formatter/issues/9. Use
+# 'cfn-format' and YAML comments sparingly.
+
 AWSTemplateFormatVersion: "2010-09-09"
 
 Description: Identity and access management layer for TinyDevCRM
@@ -5,7 +18,7 @@ Description: Identity and access management layer for TinyDevCRM
 Parameters:
   MyIAMUserPassword:
     Type: String
-    Description: Password for IAM user
+    Description: Password for IAM user. Ensure that the password matches default AWS password policies.
 
   RootAWSAccountID:
     Type: String
@@ -49,6 +62,7 @@ Resources:
     Properties:
       Description: Force IAM user to apply MFA before enabling resource control.
       ManagedPolicyName: tinydevcrm-RequireMFAPolicy
+      # From: https://gist.github.com/mixja/15d2969efe806680c2a4b0059daaf697
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -73,6 +87,8 @@ Resources:
               - "iam:CreateAccessKey"
               - "iam:ListAccessKeys"
             Resource:
+              # Escape ${} using ${!}:
+              # https://stackoverflow.com/a/44460789/1497211
               - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:user/${!aws:username}"
           - Sid: AllowIndividualUserToListTheirMFA
             Effect: Allow
