@@ -38,4 +38,33 @@ I don't feel comfortable with just self-documenting YAML templates, considering
 6.  Create a set of access credentials for this user. In `Services | IAM`, and
     in `Users | tinydevcrm-user | Security Credentials`, click on "Create Access
     Key". Then, create a new IAM user using command `aws configure --profile
-    tinydevcrm-user`. Finally, export `AWS_PROFILE` as `tinydevcrm-user`.
+    tinydevcrm-user`. This properly configures `~/.aws/credentials`.
+
+    At this point, you need to configure `~/.aws/config`. Take the section:
+
+    ```text
+    [profile tinydevcrm-user]
+    region = us-east-1
+    output = json
+    ```
+
+    And turn it into this to properly configure MFA via CLI:
+
+    ```text
+    [profile tinydevcrm-user]
+    source_profile = tinydevcrm-user
+    role_arn = arn:aws:iam::${RootAWSAccountID}:role/admin
+    role_session_name=tinydevcrm-user
+    mfa_serial = arn:aws:iam::${RootAWSAccountID}:mfa/tinydevcrm-user
+    region = us-east-1
+    output = json
+    ```
+
+    Finally, export `AWS_PROFILE` as `tinydevcrm-user` to avoid piping
+    `--profile` into `aws` commands:
+
+    ```bash
+    export AWS_PROFILE=tinydevcrm-user
+    ```
+
+    You should now be able to lift into admin role via MFA on the CLI.
