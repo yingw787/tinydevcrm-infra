@@ -7,6 +7,10 @@ Parameters:
         Type: String
         Description: Root AWS account ID
 
+    # MyPassword:
+    #     Type: String
+    #     Description: Password for IAM user
+
 Resources:
     AdminRole:
         Type: AWS::IAM::Role
@@ -141,3 +145,18 @@ Resources:
             GroupName: tinydevcrm-users
             ManagedPolicyArns:
                 - !Ref RequireMFAPolicy
+
+    User:
+        Type: AWS::IAM::User
+        DependsOn:
+            - UserGroup
+            - AdminGroup
+        Properties:
+            UserName: tinydevcrm-user
+            Groups:
+                - !Ref UserGroup
+                - !Ref AdminGroup
+            LoginProfile:
+                # Password: !Ref MyPassword
+                Password: '1BeU&pVFG8()'
+                PasswordResetRequired: false
