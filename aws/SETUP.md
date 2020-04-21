@@ -53,7 +53,7 @@ I don't feel comfortable with just self-documenting YAML templates, considering
     ```text
     [profile tinydevcrm-user]
     source_profile = tinydevcrm-user
-    role_arn = arn:aws:iam::${RootAWSAccountID}:role/admin
+    role_arn = arn:aws:iam::${RootAWSAccountID}:role/tinydevcrm-admin
     role_session_name=tinydevcrm-user
     mfa_serial = arn:aws:iam::${RootAWSAccountID}:mfa/tinydevcrm-user
     region = us-east-1
@@ -67,4 +67,12 @@ I don't feel comfortable with just self-documenting YAML templates, considering
     export AWS_PROFILE=tinydevcrm-user
     ```
 
-    You should now be able to lift into admin role via MFA on the CLI.
+    You should now be able to lift into admin role via MFA on the CLI. Check
+    using command:
+
+    ```bash
+    aws s3 ls
+    ```
+
+    Or similar. It should prompt for MFA, then give the appropriate response
+    without erroring out.
