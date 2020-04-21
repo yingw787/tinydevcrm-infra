@@ -20,8 +20,6 @@ Resources:
     #     UserName:
     AdminRole:
         Type: AWS::IAM::Role
-        DependsOn:
-            - AdminPolicy
         Properties:
             AssumeRolePolicyDocument:
                 Version: '2012-10-17'
@@ -32,20 +30,11 @@ Resources:
                         }
                         Action:
                             - 'sts:AssumeRole'
+            ManagedPolicyArns:
+                - 'arn:aws:iam::aws:policy/AdministratorAccess'
             Description: Temporarily elevates IAM user to admin-level privileges, except to change IAM permissions
             MaxSessionDuration: 3600
             RoleName: tinydevcrm-admin
-
-    AdminPolicy:
-        Type: AWS::IAM::ManagedPolicy
-        Properties:
-            ManagedPolicyName: 'AdministratorAccess'
-            PolicyDocument:
-                Version: 2012-10-17
-                Statement:
-                    - Effect: Allow
-                      Action: '*'
-                      Resource: '*'
 
     # AdminGroup:
     #     Type: AWS::IAM::Group
