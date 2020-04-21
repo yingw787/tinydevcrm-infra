@@ -20,10 +20,6 @@ Parameters:
     Type: String
     Description: Password for IAM user. Ensure that the password matches default AWS password policies.
 
-  RootAWSAccountID:
-    Type: String
-    Description: Root AWS account ID
-
 Resources:
   AdminGroup:
     Type: "AWS::IAM::Group"
@@ -48,7 +44,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${RootAWSAccountID}:root"
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
             Action:
               - "sts:AssumeRole"
       Description: Temporarily elevates IAM user to admin-level privileges, except to change IAM permissions
@@ -89,15 +85,15 @@ Resources:
             Resource:
               # Escape ${} using ${!}:
               # https://stackoverflow.com/a/44460789/1497211
-              - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:user/${!aws:username}"
+              - "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
           - Sid: AllowIndividualUserToListTheirMFA
             Effect: Allow
             Action:
               - "iam:ListVirtualMFADevices"
               - "iam:ListMFADevices"
             Resource:
-              - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:mfa/*"
-              - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:user/${!aws:username}"
+              - "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:mfa/*"
+              - "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
           - Sid: AllowIndividualUserToManageTheirMFA
             Effect: Allow
             Action:
@@ -105,8 +101,8 @@ Resources:
               - "iam:EnableMFADevice"
               - "iam:ResyncMFADevice"
             Resource:
-              - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:mfa/${!aws:username}"
-              - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:user/${!aws:username}"
+              - "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:mfa/${!aws:username}"
+              - "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
           - Sid: DenyEverythingExceptForBelowUnlessMFAd
             Effect: Deny
             NotAction:
@@ -145,8 +141,8 @@ Resources:
               - "iam:CreateAccessKey"
               - "iam:ListAccessKeys"
             NotResource:
-              - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:mfa/${!aws:username}"
-              - "Fn::Sub": "arn:aws:iam::${RootAWSAccountID}:user/${!aws:username}"
+              - "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:mfa/${!aws:username}"
+              - "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${!aws:username}"
             Condition:
               "Null":
                 "aws:MultiFactorAuthAge": "true"

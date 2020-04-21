@@ -1,9 +1,5 @@
 [
     {
-        "ParameterKey": "RootAWSAccountID",
-        "ParameterValue": "YOUR_ROOT_AWS_ACCOUNT_ID"
-    },
-    {
         "ParameterKey": "MyIAMUserPassword",
         "ParameterValue": "SOME_PASSWORD"
     }
