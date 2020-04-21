@@ -106,11 +106,32 @@ Resources:
                         - iam:GetAccountSummary
                         - iam:GetLoginProfile
                         - iam:UpdateLoginProfile
-                      Resource:
-                        - '*'
+                      Resource: '*'
                       Condition:
                         'Null':
                           'aws:MultiFactorAuthAge': 'true'
+                    - Sid: DenyIamAccessToOtherAccountsUnlessMFAd
+                      Effect: Deny
+                      Action:
+                        - iam:CreateVirtualMFADevice
+                        - iam:DeactivateMFADevice
+                        - iam:DeleteVirtualMFADevice
+                        - iam:EnableMFADevice
+                        - iam:ResyncMFADevice
+                        - iam:ChangePassword
+                        - iam:CreateLoginProfile
+                        - iam:DeleteLoginProfile
+                        - iam:GetAccountPasswordPolicy
+                        - iam:GetLoginProfile
+                        - iam:UpdateLoginProfile
+                        - iam:CreateAccessKey
+                        - iam:ListAccessKeys
+                      NotResource:
+                        - !Sub arn:aws:iam::${RootAWSAccountID}:mfa/${!aws:username}
+                        - !Sub arn:aws:iam::${RootAWSAccountID}:user/${!aws:username}
+                      Condition:
+                        'Null':
+                            'aws:MultiFactorAuthAge': 'true'
 
     # AdminGroup:
     #     Type: AWS::IAM::Group
