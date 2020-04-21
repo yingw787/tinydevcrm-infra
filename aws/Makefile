@@ -1,4 +1,4 @@
-.PHONY: create-iam
+.PHONY: create-iam deploy-iam delete-iam create-secrets
 
 # This operation implies you already have a set of root account credentials on
 # your local compute instance, or a set of credentials with administrator
@@ -18,3 +18,12 @@ deploy-iam:
 
 delete-iam:
 	aws cloudformation delete-stack --stack-name tinydevcrm-iam
+
+create-secrets:
+	aws cloudformation create-stack --stack-name tinydevcrm-secrets --template-body file://aws-secrets.yaml --capabilities CAPABILITY_NAMED_IAM
+
+deploy-secrets:
+	aws cloudformation deploy --stack-name tinydevcrm-secrets --template-file aws-secrets.yaml --capabilities CAPABILITY_NAMED_IAM
+
+delete-secrets:
+	aws cloudformation delete-stack --stack-name tinydevcrm-secrets
