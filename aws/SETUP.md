@@ -3,7 +3,7 @@
 I don't feel comfortable with just self-documenting YAML templates, considering
 `cfn-format` limitations. This document describes the setup process.
 
-## `aws-iam`: IAM layer setup.
+## `aws-iam`: IAM layer setup
 
 1.  Make sure to have `awscli` and GNU make `make` installed on your local
     compute instance. Also would be nice to have `cfn-format` installed as well.
@@ -76,3 +76,33 @@ I don't feel comfortable with just self-documenting YAML templates, considering
 
     Or similar. It should prompt for MFA, then give the appropriate response
     without erroring out.
+
+## `aws-secrets`: Key and secrets setup
+
+1.  Create an EC2 keypair.
+
+    Using the AWS CLI, run the following command, from [this set of
+    instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-services-ec2-keypairs.html):
+
+    ```bash
+    $ aws ec2 create-key-pair --key-name tinydevcrm-ec2-keypair --query 'KeyMaterial' --output text > tinydevcrm-ec2-keypair.pem
+    ```
+
+    Then change ownership of the .pem file so that owner only has read
+    permissions:
+
+    ```bash
+    $ chmod 400 tinydevcrm-ec2-keypair.pem
+    ```
+
+    And move it into `~/.ssh`:
+
+    ```bash
+    $ mv tinydevcrm-ec2-keypair.pem ~/.ssh
+    ```
+
+2.  Deploy keys and secrets using `aws-secrets.yaml`:
+
+    ```bash
+    make create-secrets
+    ```
