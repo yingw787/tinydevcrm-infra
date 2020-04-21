@@ -2,6 +2,11 @@ AWSTemplateFormatVersion: '2010-09-09'
 
 Description: Identity and access management layer for TinyDevCRM
 
+Parameters:
+    RootAWSAccountID:
+        Type: String
+        Description: Root AWS account ID
+
 Resources:
     # AdminUser:
     #     Type: AWS::IAM::User
@@ -15,16 +20,33 @@ Resources:
     #     UserName:
     AdminRole:
         Type: AWS::IAM::Role
+        DependsOn:
+            - AdminPolicy
         Properties:
             AssumeRolePolicyDocument:
                 Version: '2012-10-17'
                 Statement:
-                    Effect: Allow
-                    NotAction: "iam:*"
-                    Resource: "*"
+                    -   Effect: Allow
+                        Principal: {
+                            "AWS": !Sub "arn:aws:iam::${RootAWSAccountID}:root"
+                        }
+                        Action:
+                            - 'sts:AssumeRole'
             Description: Temporarily elevates IAM user to admin-level privileges, except to change IAM permissions
             MaxSessionDuration: 3600
             RoleName: tinydevcrm-admin
+
+    AdminPolicy:
+        Type: AWS::IAM::ManagedPolicy
+        Properties:
+            ManagedPolicyName: 'AdministratorAccess'
+            PolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: Allow
+                      Action: '*'
+                      Resource: '*'
+
     # AdminGroup:
     #     Type: AWS::IAM::Group
     #     Properties:
