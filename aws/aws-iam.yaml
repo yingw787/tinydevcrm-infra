@@ -36,6 +36,21 @@ Resources:
             MaxSessionDuration: 3600
             RoleName: tinydevcrm-admin
 
+    AdminGroup:
+        Type: AWS::IAM::Group
+        DependsOn:
+            - AdminRole
+        Properties:
+            GroupName: tinydevcrm-administrators
+            Policies:
+                - PolicyName: AssumeAdminRole
+                  PolicyDocument:
+                    Version: 2012-10-17
+                    Statement:
+                    - Effect: Allow
+                      Action: 'sts:AssumeRole'
+                      Resource: !GetAtt AdminRole.Arn
+
     # AdminGroup:
     #     Type: AWS::IAM::Group
     #     Properties:
