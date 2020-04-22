@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: 'VPC and subnet configuration for TinyDevCRM, from referencing this source: https://www.infoq.com/articles/aws-vpc-cloudformation/'
+
+Resources:
+    VPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.1.0.0/16
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            Tags:
+                - Key: Name
+                  Value: ${AWS::StackName}-vpc
