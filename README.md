@@ -161,29 +161,26 @@ and better decide product direction, among other benefits.
 
 -   [:heavy_check_mark:] Reproduce prior week's success with PostgreSQL
     installation on ECS, EC2 + EBS, and CloudFormation
+-   [:heavy_check_mark:] Create a CloudFormation IAM  definition to see whether
+    IAM user setup from Chapter 3 of *Docker on AWS* can be automated
+-   [:heavy_check_mark:] Create a CloudFormation stack for AWS Secrets
+    Management Service, AWS Key Management Service, and AWS EC2 Keypair
+    generation for secrets management for app secret keys, app superuser, and
+    database passwords can be pre-created and hooked in beforehand
 
--   [:question:] Create a CloudFormation IAM + Key Management + Secrets
-    Management definition to see whether IAM user setup from Chapter 3 of
-    *Docker on AWS* can be automated, and secrets management for app secret
-    keys, app superuser, and database passwords can be pre-created and hooked in
-    beforehand
+-   [:question:] Set up a CloudFormation EC2 definition for the compute layer,
+    with NAT traversal, autoscaling groups, and load balancing
+-   [:question:] Set up a CloudFormation EBS volume to scale out the data layer
+-   [:question:] Set up a CloudFormation EFS volume for static files to be
+    served
+-   [:question:] Set up a CloudFormation ECS definition for the container
+    orchestration layer, with service / task / cluster definitions, and
+    auto-pulling from ECR
+-   [:question:] Set up CI/CD pipelines for test and production deploys with AWS
+    CodeBuild and AWS CodePipeline
 
 -   [:question:] Copy over the `docker-compose` setup I used for
     `tinydevcrm-api`, and load up Django + `gunicorn` + NGINX + PostgreSQL +
     static files
 -   [:question:] Create CloudFormation templates for ECR repositories, and get
     the PostgreSQL + `pg_cron` image pushed up to ECR as part of that effort
--   [:question:] Set up a CloudFormation EBS volume to scale out the data layer
--   [:question:] Set up a CloudFormation EFS volume for static files to be
-    served
--   [:question:] Set up a CloudFormation EC2 definition for the compute layer,
-    with NAT traversal, autoscaling groups, and load balancing
--   [:question:] Set up a CloudFormation ECS definition for the container
-    orchestration layer, with service / task / cluster definitions, and
-    auto-pulling from ECR
--   [:question:] Set up CI/CD pipelines for test and production deploys with AWS
-    CodeBuild and AWS CodePipeline
--   [:question:] Template the template standup process with dynamically loaded
-    environment variables and Makefiles
--   [:question:] Document each step (esp. CloudFormation resources and quirks
-    encountered) in the YAML templates and the README
