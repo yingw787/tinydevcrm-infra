@@ -1,14 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: 'VPC and subnet configuration for TinyDevCRM, from referencing this source: https://www.infoq.com/articles/aws-vpc-cloudformation/'
+Description: "VPC and subnet configuration for TinyDevCRM, from referencing this source: https://www.infoq.com/articles/aws-vpc-cloudformation/"
 
 Resources:
-    VPC:
-        Type: AWS::EC2::VPC
-        Properties:
-            CidrBlock: 10.1.0.0/16
-            EnableDnsSupport: false
-            EnableDnsHostnames: false
-            Tags:
-                - Key: Name
-                  Value: !Sub ${AWS::StackName}-vpc
+  VPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.1.0.0/16"
+      EnableDnsHostnames: false
+      EnableDnsSupport: false
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-vpc"
