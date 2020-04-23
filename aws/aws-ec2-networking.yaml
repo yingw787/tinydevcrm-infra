@@ -3,6 +3,17 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "VPC and subnet configuration for TinyDevCRM, from referencing this source: https://www.infoq.com/articles/aws-vpc-cloudformation/"
 
 Resources:
+  InternetGateway:
+    Type: "AWS::EC2::InternetGateway"
+    DependsOn: VPC
+
+  InternetGatewayAttachment:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    DependsOn: InternetGateway
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
   VPC:
     Type: "AWS::EC2::VPC"
     Properties:
