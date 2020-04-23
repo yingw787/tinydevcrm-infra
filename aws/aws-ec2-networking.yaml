@@ -7,8 +7,8 @@ Resources:
         Type: AWS::EC2::VPC
         Properties:
             CidrBlock: 10.1.0.0/16
-            EnableDnsSupport: true
-            EnableDnsHostnames: true
+            EnableDnsSupport: false
+            EnableDnsHostnames: false
             Tags:
                 - Key: Name
-                  Value: ${AWS::StackName}-vpc
+                  Value: !Sub ${AWS::StackName}-vpc
