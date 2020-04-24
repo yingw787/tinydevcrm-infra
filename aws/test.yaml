@@ -14,6 +14,12 @@ Parameters:
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
 
+  NetworkingStackName:
+    Type: "String"
+    Default: "tinydevcrm-ec2-networking"
+    Description: "CloudFormation stack name of deployment instance of tinydevcrm-ec2-networking.yaml."
+
+
   SSHLocation:
     Type: String
     Default: "0.0.0.0/0"
@@ -52,7 +58,10 @@ Resources:
       KeyName: !Ref KeyName
       SecurityGroupIds:
         - !GetAtt InstanceSecurityGroup.GroupId
-      SubnetId: subnet-07aecef0ba6cf54b1
+      SubnetId:
+        Fn::ImportValue:
+          Fn::Sub:
+            ${NetworkingStackName}-subnet-a
 
   InstanceSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -64,7 +73,7 @@ Resources:
           FromPort: "22"
           IpProtocol: tcp
           ToPort: "22"
-      VpcId: 'vpc-036fae827a8d075b0'
+      VpcId: !ImportValue tinydevcrm-ec2-networking-vpc
 
 Outputs:
   AZ:
