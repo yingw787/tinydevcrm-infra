@@ -1,0 +1,10 @@
+[
+    {
+        "ParameterKey": "KeyName",
+        "ParameterValue": "$SOME_EC2_KEYPAIR_NAME"
+    },
+    {
+        "ParameterKey": "OperatorEMail",
+        "ParameterValue": "$SOME_EMAIL_ADDRESS"
+    }
+]
