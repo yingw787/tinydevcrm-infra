@@ -27,7 +27,7 @@ Resources:
   PublicSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
-      VcpId: !Ref VPC
+      VpcId: !Ref VPC
       CidrBlock: 10.1.10.0/24
       AvailabilityZone: !Select [ 0, !GetAZs ]
       Tags:
@@ -48,13 +48,13 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      CidrBlock: 10.1.50/24
+      CidrBlock: 10.1.50.0/24
       AvailabilityZone: !Select [ 0, !GetAZs ]
       Tags:
         - Key: Name
           Value: !Sub ${AWS::StackName}-private-a
 
-  PrivateSubnetB
+  PrivateSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
@@ -131,4 +131,4 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnetB
-      routeTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable
