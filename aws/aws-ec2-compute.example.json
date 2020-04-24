@@ -6,5 +6,13 @@
     {
         "ParameterKey": "OperatorEMail",
         "ParameterValue": "$SOME_EMAIL_ADDRESS"
+    },
+    {
+        "ParameterKey": "Subnets",
+        "ParameterValue": "$SOME_SUBNET_ID,$SOME_SUBNET_ID"
+    },
+    {
+        "ParameterKey": "VpcId",
+        "ParameterValue": "$SOME_VPC_ID"
     }
 ]
