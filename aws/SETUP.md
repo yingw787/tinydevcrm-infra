@@ -1,7 +1,11 @@
 # Setup
 
 I don't feel comfortable with just self-documenting YAML templates, considering
-`cfn-format` limitations. This document describes the setup process.
+`cfn-format` limitations in stripping YAML comments. So this document describes
+the setup process for TinyDevCRM infrastructure.
+
+Follow these steps one after another, and you should have working TinyDevCRM
+infrastructure deployed on AWS.
 
 ## `aws-iam`: IAM layer setup
 
@@ -106,3 +110,15 @@ I don't feel comfortable with just self-documenting YAML templates, considering
     ```bash
     make create-secrets
     ```
+
+## `aws-ec2-networking`: VPC and public subnet setup
+
+1.  Deploy the VPC and subnets using `aws-ec2-networking.yaml`:
+
+    ```bash
+    make create-ec2-networking
+    ```
+
+    That's it!
+
+## `aws-ec2-compute`: EC2 compute layer
