@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: "Compute layer for EC2 instances for TinyDevCRM"
+Description: Compute layer for EC2 instances for TinyDevCRM
 
 Parameters:
   InstanceType:
@@ -31,14 +31,14 @@ Parameters:
   Subnets:
     Type: "List<AWS::EC2::Subnet::Id>"
     Default:
-        - !ImportValue 'tinydevcrm-ec2-networking-subnet-a'
-        - !ImportValue 'tinydevcrm-ec2-networking-subnet-b'
+      - "Fn::ImportValue": tinydevcrm-ec2-networking-subnet-a
+      - "Fn::ImportValue": tinydevcrm-ec2-networking-subnet-b
     ConstraintDescription: must be a list of at least two existing subnets associated with at least two different availability zones. They should be residing in the selected Virtual Private Cloud.
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
 
   VpcId:
     Type: "AWS::EC2::VPC::Id"
-    Default: !ImportValue 'tinydevcrm-ec2-networking-vpc'
+    Default: !ImportValue tinydevcrm-ec2-networking-vpc
     Description: VpcId of your existing Virtual Private Cloud (VPC)
 
 Mappings:
@@ -56,44 +56,8 @@ Mappings:
       HVMG2: ami-0aeb704d503081ea6
 
   Region2Examples:
-    ap-northeast-1:
-      Examples: "https://s3-ap-northeast-1.amazonaws.com/cloudformation-examples-ap-northeast-1"
-    ap-northeast-2:
-      Examples: "https://s3-ap-northeast-2.amazonaws.com/cloudformation-examples-ap-northeast-2"
-    ap-northeast-3:
-      Examples: "https://s3-ap-northeast-3.amazonaws.com/cloudformation-examples-ap-northeast-3"
-    ap-south-1:
-      Examples: "https://s3-ap-south-1.amazonaws.com/cloudformation-examples-ap-south-1"
-    ap-southeast-1:
-      Examples: "https://s3-ap-southeast-1.amazonaws.com/cloudformation-examples-ap-southeast-1"
-    ap-southeast-2:
-      Examples: "https://s3-ap-southeast-2.amazonaws.com/cloudformation-examples-ap-southeast-2"
-    ca-central-1:
-      Examples: "https://s3-ca-central-1.amazonaws.com/cloudformation-examples-ca-central-1"
-    cn-north-1:
-      Examples: "https://s3.cn-north-1.amazonaws.com.cn/cloudformation-examples-cn-north-1"
-    cn-northwest-1:
-      Examples: "https://s3.cn-northwest-1.amazonaws.com.cn/cloudformation-examples-cn-northwest-1"
-    eu-central-1:
-      Examples: "https://s3-eu-central-1.amazonaws.com/cloudformation-examples-eu-central-1"
-    eu-north-1:
-      Examples: "https://s3-eu-north-1.amazonaws.com/cloudformation-examples-eu-north-1"
-    eu-west-1:
-      Examples: "https://s3-eu-west-1.amazonaws.com/cloudformation-examples-eu-west-1"
-    eu-west-2:
-      Examples: "https://s3-eu-west-2.amazonaws.com/cloudformation-examples-eu-west-2"
-    eu-west-3:
-      Examples: "https://s3-eu-west-3.amazonaws.com/cloudformation-examples-eu-west-3"
-    sa-east-1:
-      Examples: "https://s3-sa-east-1.amazonaws.com/cloudformation-examples-sa-east-1"
     us-east-1:
       Examples: "https://s3.amazonaws.com/cloudformation-examples-us-east-1"
-    us-east-2:
-      Examples: "https://s3-us-east-2.amazonaws.com/cloudformation-examples-us-east-2"
-    us-west-1:
-      Examples: "https://s3-us-west-1.amazonaws.com/cloudformation-examples-us-west-1"
-    us-west-2:
-      Examples: "https://s3-us-west-2.amazonaws.com/cloudformation-examples-us-west-2"
 
 Resources:
   ALBListener:
