@@ -30,15 +30,11 @@ Parameters:
 
   Subnets:
     Type: "List<AWS::EC2::Subnet::Id>"
-    Default:
-      - "Fn::ImportValue": tinydevcrm-ec2-networking-subnet-a
-      - "Fn::ImportValue": tinydevcrm-ec2-networking-subnet-b
     ConstraintDescription: must be a list of at least two existing subnets associated with at least two different availability zones. They should be residing in the selected Virtual Private Cloud.
     Description: The list of SubnetIds in your Virtual Private Cloud (VPC)
 
   VpcId:
     Type: "AWS::EC2::VPC::Id"
-    Default: !ImportValue tinydevcrm-ec2-networking-vpc
     Description: VpcId of your existing Virtual Private Cloud (VPC)
 
 Mappings:
