@@ -50,18 +50,21 @@ Resources:
             - Arch
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyName
-      SecurityGroups:
-        - Ref: InstanceSecurityGroup
+      SecurityGroupIds:
+        - !GetAtt InstanceSecurityGroup.GroupId
+      SubnetId: subnet-07aecef0ba6cf54b1
 
   InstanceSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription: Enable SSH access via port 22
+      GroupName: tinydevcrm-ec2-compute-sg
       SecurityGroupIngress:
         - CidrIp: !Ref SSHLocation
           FromPort: "22"
           IpProtocol: tcp
           ToPort: "22"
+      VpcId: 'vpc-036fae827a8d075b0'
 
 Outputs:
   AZ:

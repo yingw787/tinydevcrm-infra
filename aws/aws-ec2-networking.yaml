@@ -41,6 +41,7 @@ Resources:
         - Key: Name
           Value: !Sub "${AWS::StackName}-public-a"
       VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
 
   PublicSubnetARouteTableAssociation:
     Type: "AWS::EC2::SubnetRouteTableAssociation"
