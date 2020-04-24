@@ -90,7 +90,22 @@ Resources:
 
   PrivateRoute1:
     Type: AWS::EC2::Route
+    DependsOn: NATGateway
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: ???
+      NatGatewayId: !Ref NATGateway
+
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NATElasticIPAddress.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-nat-gateway
+
+  NATElasticIPAddress:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: VPC
