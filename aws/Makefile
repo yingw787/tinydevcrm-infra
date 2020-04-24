@@ -1,4 +1,4 @@
-.PHONY: create-iam deploy-iam delete-iam create-secrets
+.PHONY: create-iam deploy-iam delete-iam create-secrets create-ec2-networking
 
 # This operation implies you already have a set of root account credentials on
 # your local compute instance, or a set of credentials with administrator
@@ -27,3 +27,12 @@ deploy-secrets:
 
 delete-secrets:
 	aws cloudformation delete-stack --stack-name tinydevcrm-secrets
+
+create-ec2-networking:
+	aws cloudformation create-stack --stack-name tinydevcrm-ec2-networking --template-body file://aws-ec2-networking.yaml --capabilities CAPABILITY_NAMED_IAM
+
+deploy-ec2-networking:
+	aws cloudformation deploy --stack-name tinydevcrm-ec2-networking --template-file aws-ec2-networking.yaml --capabilities CAPABILITY_NAMED_IAM
+
+delete-ec2-networking:
+	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-networking
