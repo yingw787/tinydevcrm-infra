@@ -75,3 +75,22 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-vpc"
+
+Outputs:
+  PublicSubnetAReference:
+    Description: Public subnet A reference
+    Value: !Ref PublicSubnetA
+    Export:
+      Name: !Sub ${AWS::StackName}-subnet-a
+
+  PublicSubnetBReference:
+    Description: Public subnet B reference
+    Value: !Ref PublicSubnetB
+    Export:
+      Name: !Sub ${AWS::StackName}-subnet-b
+
+  VPCReference:
+    Description: VPC reference
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${AWS::StackName}-vpc
