@@ -36,3 +36,12 @@ deploy-ec2-networking:
 
 delete-ec2-networking:
 	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-networking
+
+create-ec2-compute:
+	aws cloudformation create-stack --stack-name tinydevcrm-ec2-compute --template-body file://aws-ec2-compute.yaml --parameters file://aws-ec2-compute.json --capabilities CAPABILITY_NAMED_IAM
+
+deploy-ec2-compute:
+	aws cloudformation deploy --stack-name tinydevcrm-ec2-compute --template-file aws-ec2-compute.yaml --capabilities CAPABILITY_NAMED_IAM
+
+delete-ec2-compute:
+	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-compute
