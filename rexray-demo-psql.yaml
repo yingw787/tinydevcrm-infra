@@ -289,6 +289,8 @@ Resources:
 
   ApplicationTaskDefinition:
     Type: AWS::ECS::TaskDefinition
+    DependsOn:
+      - ApplicationVolume
     Properties:
       ContainerDefinitions:
         - LogConfiguration:
@@ -327,6 +329,42 @@ Resources:
             DriverOpts:
               volumetype: gp2
               size: '5'
+
+  ApplicationVolume:
+    Type: AWS::EC2::Volume
+    Properties:
+      Size: 1
+      AvailabilityZone: !Select
+        - 0
+        - "Fn::GetAZs": ""
+      VolumeType: gp2
+      Tags:
+        - Key: Name
+          Value: rexray-vol
+
+  ApplicationService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ECSCluster
+      ServiceName: postgres-svc
+      TaskDefinition: !Ref ApplicationTaskDefinition
+      LoadBalancers:
+        - TargetGroupArn: !Ref MySQLTargetGroup
+          ContainerName: postgres
+          ContainerPort: 5432
+      DesiredCount: 1
+      LaunchType: EC2
+      HealthCheckGracePeriodSeconds: 60
+      DeploymentConfiguration:
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref Subnet1
+          SecurityGroups:
+            - !Ref InstanceSecurityGroup
+          AssignPublicIp: DISABLED
 
   MySQLTargetGroup:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
