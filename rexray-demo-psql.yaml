@@ -287,6 +287,47 @@ Resources:
         - Key: Network
           Value: Public
 
+  ApplicationTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CWLogsGroup
+              awslogs-region: us-east-1
+              awslogs-stream-prefix: ecs
+          PortMappings:
+            - ContainerPort: 5432
+              Protocol: tcp
+          Environment:
+            - Name: POSTGRES_PASSWORD
+              Value: my-secret-pw
+          MountPoints:
+            - ContainerPath: /var/lib/postgresql/data
+              SourceVolume: rexray-vol
+          Image: postgres
+          Essential: true
+          Name: postgres
+      PlacementConstraints:
+        - Type: memberOf
+          Expression: attribute:ecs.availability-zone==us-east-1a
+      Memory: '512'
+      Family: postgres
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - EC2
+      Cpu: '512'
+      Volumes:
+        - Name: rexray-vol
+          DockerVolumeConfiguration:
+            Autoprovision: true
+            Scope: shared
+            Driver: rexray/ebs
+            DriverOpts:
+              volumetype: gp2
+              size: '5'
+
   MySQLTargetGroup:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Properties:
