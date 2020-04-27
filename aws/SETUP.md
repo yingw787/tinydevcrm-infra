@@ -122,3 +122,16 @@ infrastructure deployed on AWS.
     That's it!
 
 ## `aws-ec2-compute`: EC2 compute layer
+
+1.  Copy over the VPC ID and the public subnet IDs generated in the
+    CloudFormation stack defined by `aws-ec2-networking.yaml`. This is necessary
+    because only a strict string can be passed as default parameters for
+    CloudFormation templates,
+
+    TODO: Replace with `!ImportValue` or StackSets.
+
+2.  Create the compute layer using `aws-ec2-compute.yaml`:
+
+    ```bash
+    make create-ec2-compute
+    ```
