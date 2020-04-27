@@ -14,3 +14,10 @@ Resources:
         - Key: Name
           Value: tinydevcrm-ebs
       VolumeType: gp2
+
+  ApplicationEFSFilesystem:
+    Type: "AWS::EFS::FileSystem"
+    Properties:
+      FileSystemTags:
+        - Key: Name
+          Value: tinydevcrm-efs
