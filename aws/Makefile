@@ -37,6 +37,15 @@ deploy-ec2-networking:
 delete-ec2-networking:
 	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-networking
 
+create-ec2-persist:
+	aws cloudformation create-stack --stack-name tinydevcrm-ec2-persist --template-body file://aws-ec2-persist.yaml --capabilities CAPABILITY_NAMED_IAM
+
+deploy-ec2-persist:
+	aws cloudformation deploy --stack-name tinydevcrm-ec2-persist --template-file aws-ec2-persist.yaml --capabilities CAPABILITY_NAMED_IAM
+
+delete-ec2-persist:
+	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-persist
+
 create-ec2-compute:
 	aws cloudformation create-stack --stack-name tinydevcrm-ec2-compute --template-body file://aws-ec2-compute.yaml --parameters file://aws-ec2-compute.json --capabilities CAPABILITY_NAMED_IAM
 
