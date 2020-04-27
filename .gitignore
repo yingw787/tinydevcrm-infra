@@ -1,3 +1,9 @@
+# Ignored files.
+
+# AWS configuration files.
+aws/aws-iam.json
+aws/aws-ec2-compute.json
+
 postgres-taskdef.json
 postgres-svcdef.json
 drain-instance.sh
