@@ -139,14 +139,60 @@ Resources:
   EC2Role:
     Type: "AWS::IAM::Role"
     Properties:
-      AssumeRolePolicyDocument: "{\n  \"Statement\": [{\n      \"Action\": \"sts:AssumeRole\",\n      \"Effect\": \"Allow\",\n      \"Principal\": {\n        \"Service\": \"ec2.amazonaws.com\"\n      }\n  }]\n}\n"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - sts:AssumeRole
+            Principal:
+              Service: ec2.amazonaws.com
       Path: /
       Policies:
         - PolicyName: ECSforEC2InstanceRolePolicy
-          PolicyDocument: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"ecs:CreateCluster\",\n        \"ecs:DeregisterContainerInstance\",\n        \"ecs:DiscoverPollEndpoint\",\n        \"ecs:Poll\",\n        \"ecs:RegisterContainerInstance\",\n        \"ecs:StartTelemetrySession\",\n        \"ecs:Submit*\",\n        \"ecr:GetAuthorizationToken\",\n        \"ecr:BatchCheckLayerAvailability\",\n        \"ecr:GetDownloadUrlForLayer\",\n        \"ecr:BatchGetImage\",\n        \"logs:CreateLogStream\",\n        \"logs:PutLogEvents\"\n      ],\n      \"Resource\": \"*\"\n    }\n  ]\n}\n"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecs:CreateCluster
+                  - ecs:DeregisterContainerInstance
+                  - ecs:DiscoverPollEndpoint
+                  - ecs:Poll
+                  - ecs:RegisterContainerInstance
+                  - ecs:StartTelemetrySession
+                  - ecs:Submit
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
         - PolicyName: RexrayPolicy
-          PolicyDocument: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Action\": [\n      \"ec2:AttachVolume\",\n      \"ec2:CreateVolume\",\n      \"ec2:CreateSnapshot\",\n      \"ec2:CreateTags\",\n      \"ec2:DeleteVolume\",\n      \"ec2:DeleteSnapshot\",\n      \"ec2:DescribeAvailabilityZones\",\n      \"ec2:DescribeInstances\",\n      \"ec2:DescribeVolumes\",\n      \"ec2:DescribeVolumeAttribute\",\n      \"ec2:DescribeVolumeStatus\",\n      \"ec2:DescribeSnapshots\",\n      \"ec2:CopySnapshot\",\n      \"ec2:DescribeSnapshotAttribute\",\n      \"ec2:DetachVolume\",\n      \"ec2:ModifySnapshotAttribute\",\n      \"ec2:ModifyVolumeAttribute\",\n      \"ec2:DescribeTags\"\n    ],\n    \"Resource\": \"*\"\n  }]\n}\n"
-
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:AttachVolume
+                  - ec2:CreateVolume
+                  - ec2:CreateSnapshot
+                  - ec2:CreateTags
+                  - ec2:DeleteVolume
+                  - ec2:DeleteSnapshot
+                  - ec2:DescribeAvailabilityZones
+                  - ec2:DescribeInstances
+                  - ec2:DescribeVolumes
+                  - ec2:DescribeVolumeAttribute
+                  - ec2:DescribeVolumeStatus
+                  - ec2:DescribeSnapshots
+                  - ec2:CopySnapshot
+                  - ec2:DescribeSnapshotAttribute
+                  - ec2:DetachVolume
+                  - ec2:ModifySnapshotAttribute
+                  - ec2:ModifyVolumeAttribute
+                  - ec2:DescribeTags
+                Resource: '*'
   ECSAutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     CreationPolicy:
@@ -183,7 +229,7 @@ Resources:
   ECSCluster:
     Type: "AWS::ECS::Cluster"
     Properties:
-      ClusterName: rexray-demo
+      ClusterName: rexray-demo2
 
   ECSServiceAutoScalingRole:
     Type: "AWS::IAM::Role"
