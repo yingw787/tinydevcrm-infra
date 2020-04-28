@@ -42,3 +42,29 @@ Resources:
       GroupDescription: Access to ECS hosts that run containers
       VpcId:
         Fn::ImportValue: !Ref VPCReference
+
+  ECSSecurityGroupIngressFromPublicALB:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Ingress rule to ECS hosts from the public-facing application load balancer. IpProtocol of -1 allows all protocols / network traffic. SourceSecurityGroupId references the security group for the foreign resource.
+      GroupId: !Ref ECSHostSecurityGroup
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
+
+  ECSSecurityGroupIngressFromSelf:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      Description: Ingress rule to ECS hosts from other ECS hosts within the same security group.
+      GroupId: !Ref ECSHostSecurityGroup
+      IpProtocol: -1
+      SourceSecurityGroupId: !Ref ECSHostSecurityGroup
+
+  PublicLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for the public-facing load balancer. Allows access from anywhere on the Internet.
+      VpcId:
+        Fn::ImportValue: !Ref VPCReference
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
