@@ -44,14 +44,33 @@ Parameters:
     Description: "Reference to VPC deployed as part of stack `tinydevcrm-ec2-networking.yaml`."
 
 Resources:
-  EC2InstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
+  EC2AutoscalingRole:
+    Type: "AWS::IAM::Role"
+    Description: Role to define EC2 autoscaling. NOTE that the EC2 autoscaling group may fail to stabilize if this role is mis-defined.
     Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - application-autoscaling.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
       Path: /
-      Roles:
-        - Ref: EC2Role
+      Policies:
+        - PolicyName: service-autoscaling
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "application-autoscaling:*"
+                  - "cloudwatch:DescribeAlarms"
+                  - "cloudwatch:PutMetricAlarm"
+                  - "ecs:DescribeServices"
+                  - "ecs:UpdateService"
+                Resource: "*"
 
-  EC2Role:
+  EC2HostsRole:
     Type: "AWS::IAM::Role"
     Description: "Role for EC2 hosts as passed by resource 'EC2InstanceProfile'. This allows the ECS agent on the EC2 hosts to communicate with the ECS control plane, and download container images from AWS ECR to run with the host."
     Properties:
@@ -83,6 +102,13 @@ Resources:
                   - "ecr:BatchGetImage"
                   - "ecr:GetDownloadUrlForLayer"
                 Resource: "*"
+
+  EC2InstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: /
+      Roles:
+        - Ref: EC2HostsRole
 
   ECSAutoscalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
