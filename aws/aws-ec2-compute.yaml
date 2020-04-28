@@ -5,7 +5,7 @@ Description: Compute layer for EC2 + ECS autoscaling groups for TinyDevCRM. Uses
 Parameters:
   EC2DesiredCapacity:
     Type: Number
-    Default: "2"
+    Default: "1"
     Description: Average number of EC2 instances to launch in the ECS cluster.
 
   EC2InstanceType:
