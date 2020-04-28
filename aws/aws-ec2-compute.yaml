@@ -3,12 +3,105 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Compute layer for EC2 + ECS autoscaling groups for TinyDevCRM. Uses public VPC subnets and a public-facing load balancer.
 
 Parameters:
+  EC2DesiredCapacity:
+    Type: Number
+    Default: "2"
+    Description: Average number of EC2 instances to launch in the ECS cluster.
+
+  EC2InstanceType:
+    Type: String
+    Default: t2.medium
+    Description: Instance type of the EC2 instance acting as ECS host.
+
+  EC2MaximumCapacity:
+    Type: Number
+    Default: "6"
+    Description: Maximum number of EC2 instances to launch in the ECS cluster.
+
+  EC2MinimumCapacity:
+    Type: Number
+    Default: "1"
+    Description: Minimum number of EC2 instances to launch in the ECS cluster.
+
+  ECSHostAMI:
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
+    Description: ID for the ECS-optimized EC2 AMI, updated to Amazon Linux 2.
+
+  PublicSubnetAReference:
+    Type: String
+    Default: tinydevcrm-ec2-networking-subnet-a
+    Description: "Reference to public subnet A as part of stack 'tinydevcrm-ec2-networking.yaml'."
+
+  PublicSubnetBReference:
+    Type: String
+    Default: tinydevcrm-ec2-networking-subnet-b
+    Description: "Reference to public subnet B as part of stack 'tinydevcrm-ec2-networking.yaml'."
+
   VPCReference:
     Type: String
     Default: tinydevcrm-ec2-networking-vpc
     Description: "Reference to VPC deployed as part of stack `tinydevcrm-ec2-networking.yaml`."
 
 Resources:
+  EC2InstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: /
+      Roles:
+        - Ref: EC2Role
+
+  EC2Role:
+    Type: "AWS::IAM::Role"
+    Description: "Role for EC2 hosts as passed by resource 'EC2InstanceProfile'. This allows the ECS agent on the EC2 hosts to communicate with the ECS control plane, and download container images from AWS ECR to run with the host."
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: ecs-service
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecs:CreateCluster"
+                  - "ecs:DeregisterContainerInstance"
+                  - "ecs:DiscoverPollEndpoint"
+                  - "ecs:Poll"
+                  - "ecs:RegisterContainerInstance"
+                  - "ecs:StartTelemetrySession"
+                  - "ecs:Submit*"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchGetImage"
+                  - "ecr:GetDownloadUrlForLayer"
+                Resource: "*"
+
+  ECSAutoscalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+    Description: "This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers. CreationPolicy sets timeout after 15 minutes if the resource hasn't been created yet."
+    Properties:
+      DesiredCapacity: !Ref EC2DesiredCapacity
+      LaunchConfigurationName: !Ref ECSLaunchConfiguration
+      MaxSize: !Ref EC2MaximumCapacity
+      MinSize: !Ref EC2MinimumCapacity
+      VPCZoneIdentifier:
+        - "Fn::ImportValue": !Ref PublicSubnetAReference
+        - "Fn::ImportValue": !Ref PublicSubnetBReference
+    UpdatePolicy:
+      AutoscalingReplacingUpdate:
+        WillReplace: true
+
   ECSCluster:
     Type: "AWS::ECS::Cluster"
     Description: ECS cluster for deploying ECS task and service definitions.
@@ -22,6 +115,22 @@ Resources:
       GroupDescription: Access to ECS hosts that run containers
       VpcId: !ImportValue
         Ref: VPCReference
+
+  ECSLaunchConfiguration:
+    Type: "AWS::AutoScaling::LaunchConfiguration"
+    Description: Launch configuration for EC2 instances acting as ECS hosts.
+    Properties:
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      ImageId: !Ref ECSHostAMI
+      InstanceType: !Ref EC2InstanceType
+      SecurityGroups:
+        - Ref: ECSHostSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+          yum install -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
 
   ECSSecurityGroupIngressFromPublicALB:
     Type: "AWS::EC2::SecurityGroupIngress"
