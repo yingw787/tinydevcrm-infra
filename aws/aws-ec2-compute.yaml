@@ -3,24 +3,42 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description:  Compute layer for EC2 + ECS autoscaling groups for TinyDevCRM. Uses public VPC subnets and a public-facing load balancer.
 
 Parameters:
-  EC2DesiredCapacity:
-    Type: Number
-    Default: '2'
-    Description: Average number of EC2 instances to launch in the ECS cluster.
-
-  EC2MaximumCapacity:
-    Type: Number
-    Default: '6'
-    Description: Maximum number of EC2 instances to launch in the ECS cluster.
-
-  ECSAMI:
-    Description: ID for the ECS-optimized EC2 AMI, updated to Amazon Linux 2.
-    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
-
-  EC2InstanceType:
+  VPCReference:
     Type: String
-    Default: t2.medium
-    Description: EC2 instance type.
+    Default: tinydevcrm-ec2-networking-vpc
+    Description: Reference to VPC deployed as part of stack `tinydevcrm-ec2-networking.yaml`.
+
+  # EC2DesiredCapacity:
+  #   Type: Number
+  #   Default: '2'
+  #   Description: Average number of EC2 instances to launch in the ECS cluster.
+
+  # EC2MaximumCapacity:
+  #   Type: Number
+  #   Default: '6'
+  #   Description: Maximum number of EC2 instances to launch in the ECS cluster.
+
+  # ECSAMI:
+  #   Description: ID for the ECS-optimized EC2 AMI, updated to Amazon Linux 2.
+  #   Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+  #   Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
+
+  # EC2InstanceType:
+  #   Type: String
+  #   Default: t2.medium
+  #   Description: EC2 instance type.
 
 Resources:
+  ECSCluster:
+    Type: "AWS::ECS::Cluster"
+    Description: ECS cluster for deploying ECS task and service definitions.
+    Properties:
+      ClusterName: !Sub "tinydevcrm-ecs-cluster"
+
+  ECSHostSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Description: Security group for the EC2 hosts that will run the containers.
+    Properties:
+      GroupDescription: Access to ECS hosts that run containers
+      VpcId:
+        Fn::ImportValue: !Ref VPCReference
