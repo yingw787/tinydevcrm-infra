@@ -44,6 +44,25 @@ Parameters:
     Description: "Reference to VPC deployed as part of stack `tinydevcrm-ec2-networking.yaml`."
 
 Resources:
+  DummyTargetGroupPublic:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Description: A dummy target group is used to set up the application load balncer to just drop network traffic initially, before any real service target groups have been added.
+    Properties:
+      HealthCheckIntervalSeconds: 6
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Name: !Join
+        - "-"
+        - - Ref: "AWS::StackName"
+          - drop-1
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !ImportValue
+        Ref: VPCReference
+
   EC2AutoscalingRole:
     Type: "AWS::IAM::Role"
     Description: Role to define EC2 autoscaling. NOTE that the EC2 autoscaling group may fail to stabilize if this role is mis-defined.
@@ -110,6 +129,39 @@ Resources:
       Roles:
         - Ref: EC2HostsRole
 
+  ECSAgentRole:
+    Type: "AWS::IAM::Role"
+    Description: "IAM role to authorize ECS to manage resources on your account on your behalf. Policy 'ecs-service' allows ECS to attach network interfaces to EC2 instances to get 'awsvpc' working properly, and updates load balancers to send traffic to containers properly."
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: ecs-service
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ec2:AttachNetworkInterface"
+                  - "ec2:CreateNetworkInterface"
+                  - "ec2:CreateNetworkInterfacePermission"
+                  - "ec2:DeleteNetworkInterface"
+                  - "ec2:DeleteNetworkInterfacePermission"
+                  - "ec2:Describe*"
+                  - "ec2:DetachNetworkInterface"
+                  - "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
+                  - "elasticloadbalancing:DeregisterTargets"
+                  - "elasticloadbalancing:Describe*"
+                  - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+                  - "elasticloadbalancing:RegisterTargets"
+                Resource: "*"
+
   ECSAutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     CreationPolicy:
@@ -132,7 +184,7 @@ Resources:
     Type: "AWS::ECS::Cluster"
     Description: ECS cluster for deploying ECS task and service definitions.
     Properties:
-      ClusterName: !Sub ${AWS::StackName}-ecs-cluster
+      ClusterName: !Sub "${AWS::StackName}-ecs-cluster"
 
   ECSHostSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -151,12 +203,8 @@ Resources:
       InstanceType: !Ref EC2InstanceType
       SecurityGroups:
         - Ref: ECSHostSecurityGroup
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
-          yum install -y aws-cfn-bootstrap
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
+      UserData: !Base64
+        "Fn::Sub": "#!/bin/bash -xe\necho ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config\nyum install -y aws-cfn-bootstrap\n/opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}\n"
 
   ECSSecurityGroupIngressFromPublicALB:
     Type: "AWS::EC2::SecurityGroupIngress"
@@ -174,6 +222,32 @@ Resources:
       IpProtocol: -1
       SourceSecurityGroupId: !Ref ECSHostSecurityGroup
 
+  PublicLoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Description: Load balancer placed onto public subnets, so that network traffic from Internet can reach load balancer directly via the Internet gateway.
+    Properties:
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: "30"
+      Scheme: internet-facing
+      SecurityGroups:
+        - Ref: PublicLoadBalancerSecurityGroup
+      Subnets:
+        - "Fn::ImportValue": !Ref PublicSubnetAReference
+        - "Fn::ImportValue": !Ref PublicSubnetBReference
+
+  PublicLoadBalancerListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    DependsOn:
+      - PublicLoadBalancer
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref DummyTargetGroupPublic
+      LoadBalancerArn: !Ref PublicLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
   PublicLoadBalancerSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -183,85 +257,3 @@ Resources:
           IpProtocol: -1
       VpcId: !ImportValue
         Ref: VPCReference
-
-  PublicLoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Description: Load balancer placed onto public subnets, so that network traffic from Internet can reach load balancer directly via the Internet gateway.
-    Properties:
-      Scheme: internet-facing
-      LoadBalancerAttributes:
-        - Key: idle_timeout.timeout_seconds
-          Value: '30'
-      Subnets:
-        - "Fn::ImportValue": !Ref PublicSubnetAReference
-        - "Fn::ImportValue": !Ref PublicSubnetBReference
-      SecurityGroups:
-        - !Ref PublicLoadBalancerSecurityGroup
-
-  DummyTargetGroupPublic:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Description: A dummy target group is used to set up the application load balncer to just drop network traffic initially, before any real service target groups have been added.
-    Properties:
-      HealthCheckIntervalSeconds: 6
-      HealthCheckPath: /
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      Name:
-        Fn::Join:
-          - '-'
-          - - !Ref AWS::StackName
-            - 'drop-1'
-      Port: 80
-      Protocol: HTTP
-      UnhealthyThresholdCount: 2
-      VpcId:
-        Fn::ImportValue: !Ref VPCReference
-
-  PublicLoadBalancerListener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    DependsOn:
-      - PublicLoadBalancer
-    Properties:
-      DefaultActions:
-        - TargetGroupArn: !Ref DummyTargetGroupPublic
-          Type: 'forward'
-      LoadBalancerArn: !Ref PublicLoadBalancer
-      Port: 80
-      Protocol: HTTP
-
-  ECSAgentRole:
-    Type: AWS::IAM::Role
-    Description: IAM role to authorize ECS to manage resources on your account on your behalf.
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service: [ecs.amazonaws.com]
-          Action: ['sts:AssumeRole']
-      Path: /
-      Policies:
-      - PolicyName: ecs-service
-        PolicyDocument:
-          Statement:
-          - Effect: Allow
-            Action:
-              # Rules which allow ECS to attach network interfaces to instances
-              # on your behalf in order for awsvpc networking mode to work right
-              - 'ec2:AttachNetworkInterface'
-              - 'ec2:CreateNetworkInterface'
-              - 'ec2:CreateNetworkInterfacePermission'
-              - 'ec2:DeleteNetworkInterface'
-              - 'ec2:DeleteNetworkInterfacePermission'
-              - 'ec2:Describe*'
-              - 'ec2:DetachNetworkInterface'
-
-              # Rules which allow ECS to update load balancers on your behalf
-              # with the information sabout how to send traffic to your containers
-              - 'elasticloadbalancing:DeregisterInstancesFromLoadBalancer'
-              - 'elasticloadbalancing:DeregisterTargets'
-              - 'elasticloadbalancing:Describe*'
-              - 'elasticloadbalancing:RegisterInstancesWithLoadBalancer'
-              - 'elasticloadbalancing:RegisterTargets'
-            Resource: '*'
