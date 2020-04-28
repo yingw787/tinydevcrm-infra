@@ -164,10 +164,7 @@ Resources:
 
   ECSAutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
-    CreationPolicy:
-      ResourceSignal:
-        Timeout: PT5M
-    Description: "This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers. CreationPolicy sets timeout after 5 minutes if the resource hasn't been created yet."
+    Description: "This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers."
     Properties:
       DesiredCapacity: !Ref EC2DesiredCapacity
       LaunchConfigurationName: !Ref ECSLaunchConfiguration
