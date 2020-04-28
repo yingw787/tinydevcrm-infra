@@ -44,89 +44,89 @@ Parameters:
     Description: "Reference to VPC deployed as part of stack `tinydevcrm-ec2-networking.yaml`."
 
 Resources:
-  EC2AutoscalingRole:
-    Type: "AWS::IAM::Role"
-    Description: Role to define EC2 autoscaling. NOTE that the EC2 autoscaling group may fail to stabilize if this role is mis-defined.
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - application-autoscaling.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Path: /
-      Policies:
-        - PolicyName: service-autoscaling
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - "application-autoscaling:*"
-                  - "cloudwatch:DescribeAlarms"
-                  - "cloudwatch:PutMetricAlarm"
-                  - "ecs:DescribeServices"
-                  - "ecs:UpdateService"
-                Resource: "*"
+  # EC2AutoscalingRole:
+  #   Type: "AWS::IAM::Role"
+  #   Description: Role to define EC2 autoscaling. NOTE that the EC2 autoscaling group may fail to stabilize if this role is mis-defined.
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service:
+  #               - application-autoscaling.amazonaws.com
+  #           Action:
+  #             - "sts:AssumeRole"
+  #     Path: /
+  #     Policies:
+  #       - PolicyName: service-autoscaling
+  #         PolicyDocument:
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - "application-autoscaling:*"
+  #                 - "cloudwatch:DescribeAlarms"
+  #                 - "cloudwatch:PutMetricAlarm"
+  #                 - "ecs:DescribeServices"
+  #                 - "ecs:UpdateService"
+  #               Resource: "*"
 
-  EC2HostsRole:
-    Type: "AWS::IAM::Role"
-    Description: "Role for EC2 hosts as passed by resource 'EC2InstanceProfile'. This allows the ECS agent on the EC2 hosts to communicate with the ECS control plane, and download container images from AWS ECR to run with the host."
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Path: /
-      Policies:
-        - PolicyName: ecs-service
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - "ecs:CreateCluster"
-                  - "ecs:DeregisterContainerInstance"
-                  - "ecs:DiscoverPollEndpoint"
-                  - "ecs:Poll"
-                  - "ecs:RegisterContainerInstance"
-                  - "ecs:StartTelemetrySession"
-                  - "ecs:Submit*"
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                  - "ecr:GetAuthorizationToken"
-                  - "ecr:BatchGetImage"
-                  - "ecr:GetDownloadUrlForLayer"
-                Resource: "*"
+  # EC2HostsRole:
+  #   Type: "AWS::IAM::Role"
+  #   Description: "Role for EC2 hosts as passed by resource 'EC2InstanceProfile'. This allows the ECS agent on the EC2 hosts to communicate with the ECS control plane, and download container images from AWS ECR to run with the host."
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service:
+  #               - ec2.amazonaws.com
+  #           Action:
+  #             - "sts:AssumeRole"
+  #     Path: /
+  #     Policies:
+  #       - PolicyName: ecs-service
+  #         PolicyDocument:
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - "ecs:CreateCluster"
+  #                 - "ecs:DeregisterContainerInstance"
+  #                 - "ecs:DiscoverPollEndpoint"
+  #                 - "ecs:Poll"
+  #                 - "ecs:RegisterContainerInstance"
+  #                 - "ecs:StartTelemetrySession"
+  #                 - "ecs:Submit*"
+  #                 - "logs:CreateLogStream"
+  #                 - "logs:PutLogEvents"
+  #                 - "ecr:GetAuthorizationToken"
+  #                 - "ecr:BatchGetImage"
+  #                 - "ecr:GetDownloadUrlForLayer"
+  #               Resource: "*"
 
-  EC2InstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
-    Properties:
-      Path: /
-      Roles:
-        - Ref: EC2HostsRole
+  # EC2InstanceProfile:
+  #   Type: "AWS::IAM::InstanceProfile"
+  #   Properties:
+  #     Path: /
+  #     Roles:
+  #       - Ref: EC2HostsRole
 
-  ECSAutoScalingGroup:
-    Type: "AWS::AutoScaling::AutoScalingGroup"
-    CreationPolicy:
-      ResourceSignal:
-        Timeout: PT5M
-    Description: "This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers. CreationPolicy sets timeout after 5 minutes if the resource hasn't been created yet."
-    Properties:
-      DesiredCapacity: !Ref EC2DesiredCapacity
-      LaunchConfigurationName: !Ref ECSLaunchConfiguration
-      MaxSize: !Ref EC2MaximumCapacity
-      MinSize: !Ref EC2MinimumCapacity
-      VPCZoneIdentifier:
-        - "Fn::ImportValue": !Ref PublicSubnetAReference
-        - "Fn::ImportValue": !Ref PublicSubnetBReference
-    UpdatePolicy:
-      AutoscalingReplacingUpdate:
-        WillReplace: true
+  # ECSAutoScalingGroup:
+  #   Type: "AWS::AutoScaling::AutoScalingGroup"
+  #   CreationPolicy:
+  #     ResourceSignal:
+  #       Timeout: PT5M
+  #   Description: "This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers. CreationPolicy sets timeout after 5 minutes if the resource hasn't been created yet."
+  #   Properties:
+  #     DesiredCapacity: !Ref EC2DesiredCapacity
+  #     LaunchConfigurationName: !Ref ECSLaunchConfiguration
+  #     MaxSize: !Ref EC2MaximumCapacity
+  #     MinSize: !Ref EC2MinimumCapacity
+  #     VPCZoneIdentifier:
+  #       - "Fn::ImportValue": !Ref PublicSubnetAReference
+  #       - "Fn::ImportValue": !Ref PublicSubnetBReference
+  #   UpdatePolicy:
+  #     AutoscalingReplacingUpdate:
+  #       WillReplace: true
 
   ECSCluster:
     Type: "AWS::ECS::Cluster"
@@ -142,21 +142,21 @@ Resources:
       VpcId: !ImportValue
         Ref: VPCReference
 
-  ECSLaunchConfiguration:
-    Type: "AWS::AutoScaling::LaunchConfiguration"
-    Description: Launch configuration for EC2 instances acting as ECS hosts.
-    Properties:
-      IamInstanceProfile: !Ref EC2InstanceProfile
-      ImageId: !Ref ECSHostAMI
-      InstanceType: !Ref EC2InstanceType
-      SecurityGroups:
-        - Ref: ECSHostSecurityGroup
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
-          yum install -y aws-cfn-bootstrap
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
+  # ECSLaunchConfiguration:
+  #   Type: "AWS::AutoScaling::LaunchConfiguration"
+  #   Description: Launch configuration for EC2 instances acting as ECS hosts.
+  #   Properties:
+  #     IamInstanceProfile: !Ref EC2InstanceProfile
+  #     ImageId: !Ref ECSHostAMI
+  #     InstanceType: !Ref EC2InstanceType
+  #     SecurityGroups:
+  #       - Ref: ECSHostSecurityGroup
+  #     UserData:
+  #       Fn::Base64: !Sub |
+  #         #!/bin/bash -xe
+  #         echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+  #         yum install -y aws-cfn-bootstrap
+  #         /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
 
   ECSSecurityGroupIngressFromPublicALB:
     Type: "AWS::EC2::SecurityGroupIngress"
