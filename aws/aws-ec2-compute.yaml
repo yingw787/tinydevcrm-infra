@@ -13,6 +13,10 @@ Parameters:
     Default: t2.medium
     Description: Instance type of the EC2 instance acting as ECS host.
 
+  EC2KeyName:
+    Type: "AWS::EC2::KeyPair::KeyName"
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the ECS instances
+
   EC2MaximumCapacity:
     Type: Number
     Default: "6"
@@ -37,6 +41,15 @@ Parameters:
     Type: String
     Default: tinydevcrm-ec2-networking-subnet-b
     Description: "Reference to public subnet B as part of stack 'tinydevcrm-ec2-networking.yaml'."
+
+  SSHLocation:
+    Type: String
+    Default: "0.0.0.0/0"
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+    Description: " The IP address range that can be used to SSH to the EC2 instances"
+    MaxLength: "18"
+    MinLength: "9"
 
   VPCReference:
     Type: String
@@ -164,7 +177,7 @@ Resources:
 
   ECSAutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
-    Description: "This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers."
+    Description: This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers.
     Properties:
       DesiredCapacity: !Ref EC2DesiredCapacity
       LaunchConfigurationName: !Ref ECSLaunchConfiguration
@@ -198,6 +211,7 @@ Resources:
       IamInstanceProfile: !Ref EC2InstanceProfile
       ImageId: !Ref ECSHostAMI
       InstanceType: !Ref EC2InstanceType
+      KeyName: !Ref EC2KeyName
       SecurityGroups:
         - Ref: ECSHostSecurityGroup
       UserData: !Base64
@@ -210,6 +224,16 @@ Resources:
       GroupId: !Ref ECSHostSecurityGroup
       IpProtocol: -1
       SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
+
+  ECSSecurityGroupIngressFromSSH:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      CidrIp: !Ref SSHLocation
+      Description: Ingress rule to ECS hosts to explicitly allow SSH from a specific SSH location.
+      FromPort: "22"
+      GroupId: !Ref ECSHostSecurityGroup
+      IpProtocol: tcp
+      ToPort: "22"
 
   ECSSecurityGroupIngressFromSelf:
     Type: "AWS::EC2::SecurityGroupIngress"
