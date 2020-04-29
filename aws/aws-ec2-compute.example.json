@@ -1,18 +1,10 @@
 [
     {
-        "ParameterKey": "KeyName",
-        "ParameterValue": "$SOME_EC2_KEYPAIR_NAME"
+        "ParameterKey": "EC2KeyName",
+        "ParameterValue": "$SOME_EC2_KEYPAIR"
     },
     {
-        "ParameterKey": "OperatorEMail",
-        "ParameterValue": "$SOME_EMAIL_ADDRESS"
-    },
-    {
-        "ParameterKey": "Subnets",
-        "ParameterValue": "$SOME_SUBNET_ID,$SOME_SUBNET_ID"
-    },
-    {
-        "ParameterKey": "VpcId",
-        "ParameterValue": "$SOME_VPC_ID"
+        "ParameterKey": "SSHLocation",
+        "ParameterValue": "$SSH_CIDR_IP_WITH_SUBNET_MASK"
     }
 ]
