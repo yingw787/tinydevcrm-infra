@@ -47,22 +47,13 @@ delete-ec2-persist:
 	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-persist
 
 create-ec2-compute:
-	aws cloudformation create-stack --stack-name tinydevcrm-ec2-compute --template-body file://aws-ec2-compute.yaml --parameters file://aws-ec2-compute.json --capabilities CAPABILITY_NAMED_IAM
+	aws cloudformation create-stack --stack-name tinydevcrm-ec2-compute --template-body file://aws-ec2-compute.yaml --capabilities CAPABILITY_NAMED_IAM --parameters file://aws-ec2-compute.json
 
 deploy-ec2-compute:
 	aws cloudformation deploy --stack-name tinydevcrm-ec2-compute --template-file aws-ec2-compute.yaml --capabilities CAPABILITY_NAMED_IAM
 
 delete-ec2-compute:
 	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-compute
-
-create-ecr:
-	aws cloudformation create-stack --stack-name tinydevcrm-ecr --template-body file://aws-ecr.yaml --capabilities CAPABILITY_NAMED_IAM
-
-deploy-ecr:
-	aws cloudformation deploy --stack-name tinydevcrm-ecr --template-file aws-ecr.yaml --capabilities CAPABILITY_NAMED_IAM
-
-delete-ecr:
-	aws cloudformation delete-stack --stack-name tinydevcrm-ecr
 
 create-ecs:
 	aws cloudformation create-stack --stack-name tinydevcrm-ecs --template-body file://aws-ecs.yaml --capabilities CAPABILITY_NAMED_IAM
