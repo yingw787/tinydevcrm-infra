@@ -54,12 +54,3 @@ deploy-ec2-compute:
 
 delete-ec2-compute:
 	aws cloudformation delete-stack --stack-name tinydevcrm-ec2-compute
-
-create-ecs:
-	aws cloudformation create-stack --stack-name tinydevcrm-ecs --template-body file://aws-ecs.yaml --capabilities CAPABILITY_NAMED_IAM
-
-deploy-ecs:
-	aws cloudformation deploy --stack-name tinydevcrm-ecs --template-file aws-ecs.yaml --capabilities CAPABILITY_NAMED_IAM
-
-delete-ecs:
-	aws cloudformation delete-stack --stack-name tinydevcrm-ecs
