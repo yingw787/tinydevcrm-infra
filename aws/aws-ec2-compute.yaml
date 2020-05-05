@@ -190,8 +190,8 @@ Resources:
         - "Fn::ImportValue": !Ref PublicSubnetAReference
         - "Fn::ImportValue": !Ref PublicSubnetBReference
     UpdatePolicy:
-      AutoscalingReplacingUpdate:
-        WillReplace: true
+      AutoScalingReplacingUpdate:
+        WillReplace: 'true'
 
   ECSCluster:
     Type: "AWS::ECS::Cluster"
