@@ -8,6 +8,11 @@ Parameters:
     Default: "1"
     Description: Average number of EC2 instances to launch in the EC2 cluster.
 
+  EC2HostAMI:
+    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
+    Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
+    Description: ID for the ECS-optimized EC2 AMI, updated to Amazon Linux 2.
+
   EC2InstanceType:
     Type: String
     Default: t2.medium
@@ -29,13 +34,8 @@ Parameters:
 
   ECSClusterName:
     Type: String
-    Default: "tinydevcrm-ecs-cluster"
-    Description: Name of the ECS cluster, to be used consistently both here and in 'aws-ecs.yaml'.
-
-  EC2HostAMI:
-    Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
-    Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
-    Description: ID for the ECS-optimized EC2 AMI, updated to Amazon Linux 2.
+    Default: tinydevcrm-ecs-cluster
+    Description: "Name of the ECS cluster, to be used consistently both here and in 'aws-ecs.yaml'."
 
   PublicSubnetAReference:
     Type: String
@@ -81,6 +81,24 @@ Resources:
       VpcId: !ImportValue
         Ref: VPCReference
 
+  EC2AutoScalingGroup:
+    Type: "AWS::AutoScaling::AutoScalingGroup"
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT5M
+    Description: This resource launches the actual EC2 instances that will register themselves as members of the EC2 cluster, and run the Docker containers. Creation policy specifies timeout after 5 minutes.
+    Properties:
+      DesiredCapacity: !Ref EC2DesiredCapacity
+      LaunchConfigurationName: !Ref EC2LaunchConfiguration
+      MaxSize: !Ref EC2MaximumCapacity
+      MinSize: !Ref EC2MinimumCapacity
+      VPCZoneIdentifier:
+        - "Fn::ImportValue": !Ref PublicSubnetAReference
+        - "Fn::ImportValue": !Ref PublicSubnetBReference
+    UpdatePolicy:
+      AutoScalingReplacingUpdate:
+        WillReplace: "true"
+
   EC2AutoscalingRole:
     Type: "AWS::IAM::Role"
     Description: Role to define EC2 autoscaling. NOTE that the EC2 autoscaling group may fail to stabilize if this role is mis-defined.
@@ -106,6 +124,14 @@ Resources:
                   - "ecs:DescribeServices"
                   - "ecs:UpdateService"
                 Resource: "*"
+
+  EC2HostSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Description: Security group for the EC2 hosts that will run the containers.
+    Properties:
+      GroupDescription: Access to EC2 hosts that run containers
+      VpcId: !ImportValue
+        Ref: VPCReference
 
   EC2HostsRole:
     Type: "AWS::IAM::Role"
@@ -147,65 +173,6 @@ Resources:
       Roles:
         - Ref: EC2HostsRole
 
-  ECSAgentRole:
-    Type: "AWS::IAM::Role"
-    Description: "IAM role to authorize ECS to manage resources on your account on your behalf. Policy 'ecs-service' allows ECS to attach network interfaces to EC2 instances to get 'awsvpc' working properly, and updates load balancers to send traffic to containers properly."
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ecs.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-      Path: /
-      Policies:
-        - PolicyName: ecs-service
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - "ec2:AttachNetworkInterface"
-                  - "ec2:CreateNetworkInterface"
-                  - "ec2:CreateNetworkInterfacePermission"
-                  - "ec2:DeleteNetworkInterface"
-                  - "ec2:DeleteNetworkInterfacePermission"
-                  - "ec2:Describe*"
-                  - "ec2:DetachNetworkInterface"
-                  - "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
-                  - "elasticloadbalancing:DeregisterTargets"
-                  - "elasticloadbalancing:Describe*"
-                  - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
-                  - "elasticloadbalancing:RegisterTargets"
-                Resource: "*"
-
-  EC2AutoScalingGroup:
-    Type: "AWS::AutoScaling::AutoScalingGroup"
-    CreationPolicy:
-      ResourceSignal:
-        Timeout: PT5M
-    Description: This resource launches the actual EC2 instances that will register themselves as members of the EC2 cluster, and run the Docker containers. Creation policy specifies timeout after 5 minutes.
-    Properties:
-      DesiredCapacity: !Ref EC2DesiredCapacity
-      LaunchConfigurationName: !Ref EC2LaunchConfiguration
-      MaxSize: !Ref EC2MaximumCapacity
-      MinSize: !Ref EC2MinimumCapacity
-      VPCZoneIdentifier:
-        - "Fn::ImportValue": !Ref PublicSubnetAReference
-        - "Fn::ImportValue": !Ref PublicSubnetBReference
-    UpdatePolicy:
-      AutoScalingReplacingUpdate:
-        WillReplace: "true"
-
-  EC2HostSecurityGroup:
-    Type: "AWS::EC2::SecurityGroup"
-    Description: Security group for the EC2 hosts that will run the containers.
-    Properties:
-      GroupDescription: Access to EC2 hosts that run containers
-      VpcId: !ImportValue
-        Ref: VPCReference
-
   EC2LaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: Launch configuration for EC2 instances acting as ECS hosts.
@@ -244,6 +211,39 @@ Resources:
       GroupId: !Ref EC2HostSecurityGroup
       IpProtocol: -1
       SourceSecurityGroupId: !Ref EC2HostSecurityGroup
+
+  ECSAgentRole:
+    Type: "AWS::IAM::Role"
+    Description: "IAM role to authorize ECS to manage resources on your account on your behalf. Policy 'ecs-service' allows ECS to attach network interfaces to EC2 instances to get 'awsvpc' working properly, and updates load balancers to send traffic to containers properly."
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: ecs-service
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ec2:AttachNetworkInterface"
+                  - "ec2:CreateNetworkInterface"
+                  - "ec2:CreateNetworkInterfacePermission"
+                  - "ec2:DeleteNetworkInterface"
+                  - "ec2:DeleteNetworkInterfacePermission"
+                  - "ec2:Describe*"
+                  - "ec2:DetachNetworkInterface"
+                  - "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
+                  - "elasticloadbalancing:DeregisterTargets"
+                  - "elasticloadbalancing:Describe*"
+                  - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+                  - "elasticloadbalancing:RegisterTargets"
+                Resource: "*"
 
   PublicLoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
