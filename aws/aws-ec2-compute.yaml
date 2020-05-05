@@ -62,7 +62,7 @@ Parameters:
     Description: "Reference to VPC deployed as part of stack `tinydevcrm-ec2-networking.yaml`."
 
 Resources:
-  DummyTargetGroupPublic:
+  PublicLoadBalancerDefaultTargetGroup:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Description: A dummy target group is used to set up the application load balncer to just drop network traffic initially, before any real service target groups have been added.
     Properties:
@@ -266,7 +266,7 @@ Resources:
     Properties:
       DefaultActions:
         - Type: forward
-          TargetGroupArn: !Ref DummyTargetGroupPublic
+          TargetGroupArn: !Ref PublicLoadBalancerDefaultTargetGroup
       LoadBalancerArn: !Ref PublicLoadBalancer
       Port: 80
       Protocol: HTTP
