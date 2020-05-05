@@ -281,3 +281,10 @@ Resources:
           IpProtocol: -1
       VpcId: !ImportValue
         Ref: VPCReference
+
+Outputs:
+  ECSClusterReference:
+    Description: ECS Cluster Reference
+    Value: !Ref ECSCluster
+    Export:
+      Name: !Sub "${AWS::StackName}-ecs-cluster"
