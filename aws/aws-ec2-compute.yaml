@@ -287,3 +287,15 @@ Outputs:
     Value: !Ref PublicLoadBalancer
     Export:
       Name: !Sub "${AWS::StackName}-public-elb"
+
+  PublicLoadBalancerListenerReference:
+    Description: Public load balancer listener reference
+    Value: !Ref PublicLoadBalancerListener
+    Export:
+      Name: !Sub "${AWS::StackName}-public-elb-listener"
+
+  PublicLoadBalancerTargetGroupReference:
+    Description: Public load balancer target group reference
+    Value: !Ref DummyTargetGroupPublic
+    Export:
+      Name: !Sub "${AWS::StackName}-public-elb-target-group"
