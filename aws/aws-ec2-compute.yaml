@@ -1,33 +1,38 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Compute layer for EC2 + ECS autoscaling groups for TinyDevCRM. Uses public VPC subnets and a public-facing load balancer.
+Description: Compute layer for EC2 autoscaling groups for TinyDevCRM. Uses public VPC subnets and a public-facing load balancer.
 
 Parameters:
   EC2DesiredCapacity:
     Type: Number
     Default: "1"
-    Description: Average number of EC2 instances to launch in the ECS cluster.
+    Description: Average number of EC2 instances to launch in the EC2 cluster.
 
   EC2InstanceType:
     Type: String
     Default: t2.medium
-    Description: Instance type of the EC2 instance acting as ECS host.
+    Description: Instance type of the EC2 instance acting as EC2 host.
 
   EC2KeyName:
     Type: "AWS::EC2::KeyPair::KeyName"
-    Description: Name of an existing EC2 KeyPair to enable SSH access to the ECS instances
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the EC2 instances
 
   EC2MaximumCapacity:
     Type: Number
     Default: "6"
-    Description: Maximum number of EC2 instances to launch in the ECS cluster.
+    Description: Maximum number of EC2 instances to launch in the EC2 cluster.
 
   EC2MinimumCapacity:
     Type: Number
     Default: "1"
-    Description: Minimum number of EC2 instances to launch in the ECS cluster.
+    Description: Minimum number of EC2 instances to launch in the EC2 cluster.
 
-  ECSHostAMI:
+  ECSClusterName:
+    Type: String
+    Default: "tinydevcrm-ecs-cluster"
+    Description: Name of the ECS cluster, to be used consistently both here and in 'aws-ecs.yaml'.
+
+  EC2HostAMI:
     Type: "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>"
     Default: /aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id
     Description: ID for the ECS-optimized EC2 AMI, updated to Amazon Linux 2.
@@ -175,15 +180,15 @@ Resources:
                   - "elasticloadbalancing:RegisterTargets"
                 Resource: "*"
 
-  ECSAutoScalingGroup:
+  EC2AutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
     CreationPolicy:
       ResourceSignal:
         Timeout: PT5M
-    Description: This resource launches the actual EC2 instances that will register themselves as members of the ECS cluster, and run the Docker containers. Creation policy specifies timeout after 5 minutes.
+    Description: This resource launches the actual EC2 instances that will register themselves as members of the EC2 cluster, and run the Docker containers. Creation policy specifies timeout after 5 minutes.
     Properties:
       DesiredCapacity: !Ref EC2DesiredCapacity
-      LaunchConfigurationName: !Ref ECSLaunchConfiguration
+      LaunchConfigurationName: !Ref EC2LaunchConfiguration
       MaxSize: !Ref EC2MaximumCapacity
       MinSize: !Ref EC2MinimumCapacity
       VPCZoneIdentifier:
@@ -193,58 +198,52 @@ Resources:
       AutoScalingReplacingUpdate:
         WillReplace: "true"
 
-  ECSCluster:
-    Type: "AWS::ECS::Cluster"
-    Description: ECS cluster for deploying ECS task and service definitions.
-    Properties:
-      ClusterName: !Sub "${AWS::StackName}-ecs-cluster"
-
-  ECSHostSecurityGroup:
+  EC2HostSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Description: Security group for the EC2 hosts that will run the containers.
     Properties:
-      GroupDescription: Access to ECS hosts that run containers
+      GroupDescription: Access to EC2 hosts that run containers
       VpcId: !ImportValue
         Ref: VPCReference
 
-  ECSLaunchConfiguration:
+  EC2LaunchConfiguration:
     Type: "AWS::AutoScaling::LaunchConfiguration"
     Description: Launch configuration for EC2 instances acting as ECS hosts.
     Properties:
       IamInstanceProfile: !Ref EC2InstanceProfile
-      ImageId: !Ref ECSHostAMI
+      ImageId: !Ref EC2HostAMI
       InstanceType: !Ref EC2InstanceType
       KeyName: !Ref EC2KeyName
       SecurityGroups:
-        - Ref: ECSHostSecurityGroup
+        - Ref: EC2HostSecurityGroup
       UserData: !Base64
-        "Fn::Sub": "#!/bin/bash -xe\necho ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config\nyum install -y aws-cfn-bootstrap\n/opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}\n"
+        "Fn::Sub": "#!/bin/bash -xe\necho ECS_CLUSTER=${ECSClusterName} >> /etc/ecs/ecs.config\nyum install -y aws-cfn-bootstrap\n/opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource EC2AutoScalingGroup --region ${AWS::Region}\n"
 
-  ECSSecurityGroupIngressFromPublicALB:
+  EC2SecurityGroupIngressFromPublicALB:
     Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
-      Description: Ingress rule to ECS hosts from the public-facing application load balancer. IpProtocol of -1 allows all protocols / network traffic. SourceSecurityGroupId references the security group for the foreign resource.
-      GroupId: !Ref ECSHostSecurityGroup
+      Description: Ingress rule to EC2 hosts from the public-facing application load balancer. IpProtocol of -1 allows all protocols / network traffic. SourceSecurityGroupId references the security group for the foreign resource.
+      GroupId: !Ref EC2HostSecurityGroup
       IpProtocol: -1
       SourceSecurityGroupId: !Ref PublicLoadBalancerSecurityGroup
 
-  ECSSecurityGroupIngressFromSSH:
+  EC2SecurityGroupIngressFromSSH:
     Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
       CidrIp: !Ref SSHLocation
-      Description: Ingress rule to ECS hosts to explicitly allow SSH from a specific SSH location.
+      Description: Ingress rule to EC2 hosts to explicitly allow SSH from a specific SSH location.
       FromPort: "22"
-      GroupId: !Ref ECSHostSecurityGroup
+      GroupId: !Ref EC2HostSecurityGroup
       IpProtocol: tcp
       ToPort: "22"
 
-  ECSSecurityGroupIngressFromSelf:
+  EC2SecurityGroupIngressFromSelf:
     Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
-      Description: Ingress rule to ECS hosts from other ECS hosts within the same security group.
-      GroupId: !Ref ECSHostSecurityGroup
+      Description: Ingress rule to EC2 hosts from other EC2 hosts within the same security group.
+      GroupId: !Ref EC2HostSecurityGroup
       IpProtocol: -1
-      SourceSecurityGroupId: !Ref ECSHostSecurityGroup
+      SourceSecurityGroupId: !Ref EC2HostSecurityGroup
 
   PublicLoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
@@ -283,12 +282,6 @@ Resources:
         Ref: VPCReference
 
 Outputs:
-  ECSClusterReference:
-    Description: ECS Cluster Reference
-    Value: !Ref ECSCluster
-    Export:
-      Name: !Sub "${AWS::StackName}-ecs-cluster"
-
   PublicLoadBalancerReference:
     Description: Public load balancer reference
     Value: !Ref PublicLoadBalancer
