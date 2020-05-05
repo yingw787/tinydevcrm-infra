@@ -191,7 +191,7 @@ Resources:
         - "Fn::ImportValue": !Ref PublicSubnetBReference
     UpdatePolicy:
       AutoScalingReplacingUpdate:
-        WillReplace: 'true'
+        WillReplace: "true"
 
   ECSCluster:
     Type: "AWS::ECS::Cluster"
@@ -288,3 +288,9 @@ Outputs:
     Value: !Ref ECSCluster
     Export:
       Name: !Sub "${AWS::StackName}-ecs-cluster"
+
+  PublicLoadBalancerReference:
+    Description: Public load balancer reference
+    Value: !Ref PublicLoadBalancer
+    Export:
+      Name: !Sub "${AWS::StackName}-public-elb"
