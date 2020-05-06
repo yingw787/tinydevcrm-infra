@@ -62,22 +62,16 @@ Parameters:
     Description: "Reference to VPC deployed as part of stack `tinydevcrm-ec2-networking.yaml`."
 
 Resources:
-  DummyTargetGroupPublic:
+  ApplicationServiceTargetGroup:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Description: A dummy target group is used to set up the application load balncer to just drop network traffic initially, before any real service target groups have been added.
     Properties:
-      HealthCheckIntervalSeconds: 6
-      HealthCheckPath: /
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      Name: !Join
-        - "-"
-        - - Ref: "AWS::StackName"
-          - drop-1
-      Port: 80
+      Port: 8000
       Protocol: HTTP
-      UnhealthyThresholdCount: 2
+      TargetType: ip
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 30
       VpcId: !ImportValue
         Ref: VPCReference
 
@@ -266,7 +260,7 @@ Resources:
     Properties:
       DefaultActions:
         - Type: forward
-          TargetGroupArn: !Ref DummyTargetGroupPublic
+          TargetGroupArn: !Ref ApplicationServiceTargetGroup
       LoadBalancerArn: !Ref PublicLoadBalancer
       Port: 80
       Protocol: HTTP
@@ -296,6 +290,6 @@ Outputs:
 
   PublicLoadBalancerTargetGroupReference:
     Description: Public load balancer target group reference
-    Value: !Ref DummyTargetGroupPublic
+    Value: !Ref ApplicationServiceTargetGroup
     Export:
       Name: !Sub "${AWS::StackName}-public-elb-target-group"
