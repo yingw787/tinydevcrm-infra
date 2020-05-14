@@ -191,9 +191,48 @@ Resources:
       Path: /
       Policies:
         - PolicyName: RexrayVolumesPolicy
-          PolicyDocument: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Action\": [\n      \"ec2:AttachVolume\",\n      \"ec2:CreateVolume\",\n      \"ec2:CreateSnapshot\",\n      \"ec2:CreateTags\",\n      \"ec2:DeleteVolume\",\n      \"ec2:DeleteSnapshot\",\n      \"ec2:DescribeAvailabilityZones\",\n      \"ec2:DescribeInstances\",\n      \"ec2:DescribeVolumes\",\n      \"ec2:DescribeVolumeAttribute\",\n      \"ec2:DescribeVolumeStatus\",\n      \"ec2:DescribeSnapshots\",\n      \"ec2:CopySnapshot\",\n      \"ec2:DescribeSnapshotAttribute\",\n      \"ec2:DetachVolume\",\n      \"ec2:ModifySnapshotAttribute\",\n      \"ec2:ModifyVolumeAttribute\",\n      \"ec2:DescribeTags\"\n    ],\n    \"Resource\": \"*\"\n  }]\n}\n"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:AttachVolume
+                  - ec2:CreateVolume
+                  - ec2:CreateSnapshot
+                  - ec2:CreateTags
+                  - ec2:DeleteVolume
+                  - ec2:DeleteSnapshot
+                  - ec2:DescribeAvailabilityZones
+                  - ec2:DescribeInstances
+                  - ec2:DescribeVolumes
+                  - ec2:DescribeVolumeAttribute
+                  - ec2:DescribeVolumeStatus
+                  - ec2:DescribeSnapshots
+                  - ec2:CopySnapshot
+                  - ec2:DescribeSnapshotAttribute
+                  - ec2:DetachVolume
+                  - ec2:ModifySnapshotAttribute
+                  - ec2:ModifyVolumeAttribute
+                  - ec2:DescribeTags
+                Resource: '*'
         - PolicyName: RexrayEFSPolicy
-          PolicyDocument: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Action\": [\n      \"elasticfilesystem:CreateFileSystem\",\n      \"elasticfilesystem:CreateMountTarget\",\n      \"ec2:DescribeSubnets\",\n      \"ec2:DescribeNetworkInterfaces\",\n      \"ec2:CreateNetworkInterface\",\n      \"elasticfilesystem:CreateTags\",\n      \"elasticfilesystem:DeleteFileSystem\",\n      \"elasticfilesystem:DeleteMountTarget\",\n      \"ec2:DeleteNetworkInterface\",\n      \"elasticfilesystem:DescribeFileSystems\",\n      \"elasticfilesystem:DescribeMountTargets\"\n    ],\n    \"Resource\": \"*\"\n  }]\n}\n"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - elasticfilesystem:CreateFileSystem
+                  - elasticfilesystem:CreateMountTarget
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:CreateNetworkInterface
+                  - elasticfilesystem:CreateTags
+                  - elasticfilesystem:DeleteFileSystem
+                  - elasticfilesystem:DeleteMountTarget
+                  - ec2:DeleteNetworkInterface
+                  - elasticfilesystem:DescribeFileSystems
+                  - elasticfilesystem:DescribeMountTargets
+                Resource: '*'
 
   ECSAutoScalingGroup:
     Type: "AWS::AutoScaling::AutoScalingGroup"
@@ -251,7 +290,17 @@ Resources:
       Path: /
       Policies:
         - PolicyName: ecs-service-autoscaling
-          PolicyDocument: "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Action\": [\n      \"application-autoscaling:*\",\n      \"cloudwatch:DescribeAlarms\",\n      \"cloudwatch:PutMetricAlarm\",\n      \"ecs:DescribeServices\",\n      \"ecs:UpdateService\"\n    ],\n    \"Resource\": \"*\"\n  }]\n}  \n"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - application-autoscaling:*
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:PutMetricAlarm
+                  - ecs:DescribeServices
+                  - ecs:UpdateService
+                Resource: '*'
 
   EFSSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
