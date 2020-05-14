@@ -96,3 +96,9 @@ Outputs:
     Value: !Ref VPC
     Export:
       Name: !Sub "${AWS::StackName}-vpc"
+
+  VPCCIDRReference:
+    Description: VPC CIDR reference
+    Value: !GetAtt VPC.CidrBlock
+    Export:
+      Name: !Sub "${AWS::StackName}-vpc-cidr"
