@@ -369,6 +369,38 @@ Resources:
       TargetType: ip
       VpcId: !Ref VPC
 
+  ApplicationTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+        - LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CWLogsGroup
+              awslogs-region: us-east-1
+              awslogs-stream-prefix: ecs
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+          MountPoints:
+            - ContainerPath: /var/www
+              SourceVolume: rexray-efs-vol
+          Image: tiffanyfay/space:apache
+          Essential: true
+          Name: space
+      Memory: '512'
+      Family: rexray-efs
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - EC2
+      Cpu: '512'
+      Volumes:
+        - Name: rexray-efs-vol
+          DockerVolumeConfiguration:
+            Autoprovision: true
+            Scope: shared
+            Driver: rexray/efs
+
 Outputs:
   AWSRegion:
     Description: The name of the region where the stack was launched
