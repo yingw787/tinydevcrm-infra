@@ -118,7 +118,11 @@ Resources:
               mode: 256
               owner: root
             /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-              content: !Sub "[cfn-auto-reloader-hook]\ntriggers=post.update\npath=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init\naction=/opt/aws/bin/cfn-init -v --region ${AWS::Region} --stack ${AWS::StackName} --resource ContainerInstances\n"
+              content: !Sub |
+                [cfn-auto-reloader-hook]
+                triggers=post.update
+                path=Resources.ContainerInstances.Metadata.AWS::CloudFormation::Init
+                action=/opt/aws/bin/cfn-init -v --region ${AWS::Region} --stack ${AWS::StackName} --resource ContainerInstances
           packages:
             yum:
               aws-cli: []
@@ -143,8 +147,26 @@ Resources:
         - Ref: EFSSecurityGroup
         - Ref: InstanceSecurityGroup
       UserData: !Base64
-        "Fn::Sub": "#!/bin/bash\nyum install -y amazon-efs-utils\nyum install -y nfs-utils\nyum install -y aws-cfn-bootstrap\n/opt/aws/bin/cfn-init -v --region ${AWS::Region} --stack ${AWS::StackName} --resource ContainerInstances\n/opt/aws/bin/cfn-signal -e $? --region ${AWS::Region} --stack ${AWS::StackName} --resource ECSAutoScalingGroup\n#open file descriptor for stderr\nexec 2>>/var/log/ecs/ecs-agent-install.log\nset -x\n#verify that the agent is running\nuntil curl -s http://localhost:51678/v1/metadata\ndo\nsleep 1\ndone\n#install the Docker volume plugin\ndocker plugin install rexray/efs REXRAY_PREEMPT=true EFS_REGION=${AWS::Region} EFS_SECURITYGROUPS=${EFSSecurityGroup} --grant-all-permissions\n#restart the ECS agent\nstop ecs \nstart ecs\n"
-
+        "Fn::Sub": |
+          #!/bin/bash
+          yum install -y amazon-efs-utils
+          yum install -y nfs-utils
+          yum install -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-init -v --region ${AWS::Region} --stack ${AWS::StackName} --resource ContainerInstances
+          /opt/aws/bin/cfn-signal -e $? --region ${AWS::Region} --stack ${AWS::StackName} --resource ECSAutoScalingGroup
+          #open file descriptor for stderr
+          exec 2>>/var/log/ecs/ecs-agent-install.log
+          set -x
+          #verify that the agent is running
+          until curl -s http://localhost:51678/v1/metadata
+          do
+          sleep 1
+          done
+          #install the Docker volume plugin
+          docker plugin install rexray/efs REXRAY_PREEMPT=true EFS_REGION=${AWS::Region} EFS_SECURITYGROUPS=${EFSSecurityGroup} --grant-all-permissions
+          #restart the ECS agent
+          stop ecs
+          start ecs
   EC2InstanceProfile:
     Type: "AWS::IAM::InstanceProfile"
     Properties:
