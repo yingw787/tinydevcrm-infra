@@ -8,4 +8,5 @@ create-stack:
 get-outputs:
 	bash create-get-outputs.sh
 	bash get-outputs.sh rexray-demo-efs us-east-1
+	echo "Make sure to run the below command"
 	# source <(./get-outputs.sh rexray-demo-efs us-east-1)
