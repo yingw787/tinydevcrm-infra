@@ -401,6 +401,29 @@ Resources:
             Scope: shared
             Driver: rexray/efs
 
+  ApplicationService:
+    Type: AWS::ECS::Service
+    Properties:
+      Cluster: !Ref ECSCluster
+      ServiceName: space-svc
+      TaskDefinition: !Ref ApplicationTaskDefinition
+      LoadBalancers:
+        - TargetGroupArn: !Ref WebTargetGroup
+          ContainerName: space
+          ContainerPort: 80
+      DesiredCount: 1
+      LaunchType: EC2
+      HealthCheckGracePeriodSeconds: 60
+      DeploymentConfiguration:
+        MaximumPercent: 100
+        MinimumHealthyPercent: 0
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref Subnet1
+          SecurityGroups:
+            - !Ref InstanceSecurityGroup
+
 Outputs:
   AWSRegion:
     Description: The name of the region where the stack was launched
